@@ -6,6 +6,7 @@ var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
 var authRouter = require('./routes/auth');
+var oauth2Router = require('./routes/oauth2');
 var myaccountRouter = require('./routes/myaccount');
 var usersRouter = require('./routes/users');
 
@@ -13,6 +14,7 @@ var app = express();
 
 require('./boot/db')();
 require('./boot/auth')();
+require('./boot/oauth2')();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -39,6 +41,7 @@ app.use(passport.authenticate('session'));
 // Define routes.
 app.use('/', indexRouter);
 app.use('/', authRouter);
+app.use('/oauth2', oauth2Router);
 app.use('/myaccount', myaccountRouter);
 app.use('/users', usersRouter);
 

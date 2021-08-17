@@ -11,6 +11,19 @@ module.exports = function() {
       name TEXT \
     )");
   });
+  
+  db.run("CREATE TABLE IF NOT EXISTS clients ( \
+    secret TEXT NOT NULL, \
+    redirect_uri TEXT NOT NULL, \
+    name TEXT NOT NULL \
+  )");
+  
+  // TODO: Only do this if not exists
+  db.run('INSERT INTO clients (secret, redirect_uri, name) VALUES (?, ?, ?)', [
+    '7Fjfp0ZBr1KtDRbnfVdmIw',
+    'http://localhost:3000/return',
+    'My Example Client'
+  ]);
 
   //db.close();
 
