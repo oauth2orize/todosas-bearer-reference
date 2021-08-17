@@ -1,5 +1,6 @@
 var express = require('express');
 var qs = require('querystring');
+var passport = require('passport');
 var as = require('../as');
 var db = require('../db');
 
@@ -69,5 +70,10 @@ router.get('/authorize',
   prompt);
 
 router.get('/continue', as.resume(evaluate), prompt);
+
+router.post('/token',
+  passport.authenticate(['basic', 'oauth2-client-password'], { session: false }),
+  as.token(),
+  as.errorHandler());
 
 module.exports = router;

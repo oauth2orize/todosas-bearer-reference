@@ -1,5 +1,7 @@
 var passport = require('passport');
-var Strategy = require('passport-local');
+var LocalStrategy = require('passport-local');
+var BasicStrategy = require('passport-http').BasicStrategy;
+var OAuth2ClientPassword = require('passport-oauth2-client-password');
 var crypto = require('crypto');
 var db = require('../db');
 
@@ -12,7 +14,7 @@ module.exports = function() {
   // (`username` and `password`) submitted by the user.  The function must verify
   // that the password is correct and then invoke `cb` with a user object, which
   // will be set at `req.user` in route handlers after authentication.
-  passport.use(new Strategy(function(username, password, cb) {
+  passport.use(new LocalStrategy(function(username, password, cb) {
     db.get('SELECT rowid AS id, * FROM users WHERE username = ?', [ username ], function(err, row) {
       if (err) { return cb(err); }
       if (!row) { return cb(null, false, { message: 'Incorrect username or password.' }); }
@@ -32,6 +34,38 @@ module.exports = function() {
       });
     });
   }));
+  
+  passport.use(new BasicStrategy(
+    function(userid, password, done) {
+      console.log('auth basic');
+      console.log(userid);
+      console.log(password);
+    }
+  ));
+  
+  passport.use(new OAuth2ClientPassword(
+    function(clientId, clientSecret, cb) {
+      console.log('auth client password');
+      console.log(clientId);
+      console.log(clientSecret);
+      
+      db.get('SELECT rowid AS id, secret, redirect_uri FROM clients WHERE rowid = ?', [ clientId ], function(err, row) {
+        if (err) { return next(err); }
+        if (!row) { return cb(null, false); }
+        
+        if (!crypto.timingSafeEqual(Buffer.from(row.secret), Buffer.from(clientSecret))) {
+          return cb(null, false, { message: 'Incorrect username or password.' });
+        }
+    
+        var client = {
+          id: row.id.toString(),
+          secret: row.secret,
+          redirectURI: row.redirectURI
+        };
+        return cb(null, client);
+      });
+    }
+  ));
 
 
   // Configure Passport authenticated session persistence.
