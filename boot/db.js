@@ -25,6 +25,14 @@ module.exports = function() {
     PRIMARY KEY (user_id, client_id) \
   )");
   
+  db.run("CREATE TABLE IF NOT EXISTS authorization_codes ( \
+    code TEXT UNIQUE NOT NULL, \
+    client_id INTEGER NOT NULL, \
+    redirect_uri TEXT NOT NULL, \
+    user_id INTEGER NOT NULL, \
+    scope TEXT \
+  )");
+  
   // TODO: Only do this if not exists
   db.run('INSERT INTO clients (secret, redirect_uri, name) VALUES (?, ?, ?)', [
     '7Fjfp0ZBr1KtDRbnfVdmIw',

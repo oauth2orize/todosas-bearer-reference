@@ -1,5 +1,7 @@
 var oauth2orize = require('oauth2orize');
+var crypto = require('crypto');
 var as = require('../as');
+var db = require('../db');
 
 
 module.exports = function() {
@@ -11,7 +13,21 @@ module.exports = function() {
     console.log(user);
     console.log(ares);
     
-    return cb(null, '2yotn');
+    crypto.randomBytes(32, function(err, buffer) {
+      if (err) { return cb(err); }
+      
+      var code = buffer.toString('base64');
+      
+      db.run('INSERT INTO authorization_codes (code, client_id, redirect_uri, user_id) VALUES (?, ?, ?, ?)', [
+        code,
+        client.id,
+        redirectURI,
+        user.id
+      ], function(err) {
+        if (err) { return next(err); }
+        return cb(null, code);
+      });
+    });
   }));
   
   as.exchange(oauth2orize.exchange.code(function(client, code, redirectURI, cb) {
