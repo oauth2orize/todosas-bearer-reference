@@ -12,7 +12,25 @@ function evaluate(client, user, scope, cb) {
   
   if (!user) { return cb(null, false, { prompt: 'login'} ); }
   
-  return cb(null, false, { prompt: 'consent' });
+  console.log('DO WE HAVE CONSENT?');
+  
+  db.get('SELECT rowid AS id, * FROM grants WHERE user_id = ? AND client_id = ?', [
+    user.id,
+    client.id
+  ], function(err, row) {
+    console.log(err);
+    console.log(row);
+    
+    if (err) { return next(err); }
+    if (!row) { return cb(null, false, { prompt: 'consent' }); }
+    
+    var grant = {
+      id: row.id.toString(),
+      userID: row.user_id,
+      clientID: row.client_id
+    };
+    return cb(null, true, { grant: grant });
+  });
 }
 
 function prompt(req, res, next) {

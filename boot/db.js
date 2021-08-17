@@ -18,6 +18,13 @@ module.exports = function() {
     name TEXT NOT NULL \
   )");
   
+  db.run("CREATE TABLE IF NOT EXISTS grants ( \
+    user_id INTEGER NOT NULL, \
+    client_id INTEGER NOT NULL, \
+    scope TEXT, \
+    PRIMARY KEY (user_id, client_id) \
+  )");
+  
   // TODO: Only do this if not exists
   db.run('INSERT INTO clients (secret, redirect_uri, name) VALUES (?, ?, ?)', [
     '7Fjfp0ZBr1KtDRbnfVdmIw',

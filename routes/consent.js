@@ -1,4 +1,5 @@
 var express = require('express');
+var qs = require('querystring');
 var ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn;
 var db = require('../db');
 
@@ -18,6 +19,33 @@ router.get('/',
         name: row.name
       };
       res.render('consent', { user: req.user, client: client, state: req.query.state });
+    });
+  });
+
+router.post('/',
+  function(req, res, next) {
+    console.log('CREATE GRANT');
+    console.log(req.user);
+    console.log(req.body);
+  
+    db.run('INSERT INTO grants (user_id, client_id) VALUES (?, ?)', [
+      req.user.id,
+      req.body.client_id
+    ], function(err) {
+      if (err) { return next(err); }
+      
+      var grant = {
+        id: this.lastID.toString(),
+        userID: req.user.id,
+        clientID: req.body.client_id
+      };
+      
+      console.log('CREATED GRANT!');
+      console.log(grant);
+      
+      if (req.body.state) {
+        return res.redirect('/oauth2/continue?'+ qs.stringify({ transaction_id: req.body.state }));
+      }
     });
   });
 

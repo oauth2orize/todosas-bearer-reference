@@ -4,10 +4,14 @@ var as = require('../as');
 
 module.exports = function() {
 
-  as.grant(oauth2orize.grant.code(function(client, redirectURI, user, ares, done) {
+  as.grant(oauth2orize.grant.code(function(client, redirectURI, user, ares, cb) {
     console.log('TODO: code grant');
-    console.log(code);
-    console.log(redirectURI)
+    console.log(client);
+    console.log(redirectURI);
+    console.log(user);
+    console.log(ares);
+    
+    return cb(null, '2yotn');
   }));
   
   as.serializeClient(function(client, cb) {
