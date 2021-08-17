@@ -12,7 +12,21 @@ function evaluate(client, user, scope, cb) {
   
   if (!user) { return cb(null, false, { prompt: 'login'} ); }
   
+  return cb(null, false, { prompt: 'consent' });
+}
+
+function prompt(req, res, next) {
+  console.log('TODO: prompt');
+  console.log(req.oauth2)
+  console.log(req.oauth2.info);
   
+  var prompt = req.oauth2.info.prompt;
+  switch (prompt) {
+  case 'login':
+    return res.redirect('/login?' + qs.stringify({ state: req.oauth2.transactionID }));
+  case 'consent':
+    return res.redirect('/consent?' + qs.stringify({ client_id: req.oauth2.client.id, state: req.oauth2.transactionID }));
+  }
 }
 
 
@@ -34,31 +48,8 @@ router.get('/authorize',
       return cb(null, client, client.redirectURI);
     });
   }, evaluate),
-  function(req, res, next) {
-    console.log('TODO: authorize');
-    console.log(req.oauth2)
-    console.log(req.oauth2.info);
-    
-    var prompt = req.oauth2.info.prompt;
-    switch (prompt) {
-    case 'login':
-      return res.redirect('/login?' + qs.stringify({ state: req.oauth2.transactionID }));
-    }
-  });
+  prompt);
 
-router.get('/continue', as.resume(evaluate),
-  function(req, res, next) {
-    console.log('TODO: continue');
-    console.log(req.oauth2)
-    console.log(req.oauth2.info);
-    
-    /*
-    var prompt = req.oauth2.info.prompt;
-    switch (prompt) {
-    case 'login':
-      return res.redirect('/login?' + qs.stringify({ state: req.oauth2.transactionID }));
-    }
-    */
-  });
+router.get('/continue', as.resume(evaluate), prompt);
 
 module.exports = router;

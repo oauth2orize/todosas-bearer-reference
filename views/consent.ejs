@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover">
+    <link rel="stylesheet" href="/stylesheets/pico.css">
+    <link rel="stylesheet" href="/stylesheets/style.css">
+    <title>Profile</title>
+    <style>
+:root:not([data-theme=dark]), [data-theme=light] {
+    --nav-background: rgba(255, 255, 255, 0.7);
+    --nav-border: rgba(115, 130, 140, 0.2);
+}
+
+[data-theme=dark] {
+    --nav-background: rgba(16, 24, 30, 0.8);
+    --nav-border: rgba(115, 130, 140, 0.2);
+}
+
+main .grid > * {
+  margin-bottom: var(--spacing);
+}
+@media (min-width: 992px) {
+  main .grid {
+    grid-column-gap: var(--spacing);
+    grid-template-columns: 25% auto;
+  }
+}
+    </style>
+  </head>
+
+  <body>
+    <main class="container">
+
+      <div class="grid">
+
+        <hgroup>
+          <h1>Consent</h1>
+          
+          <p>Do you want to allow <%= client.name %> to access your account?</p>
+        </hgroup>
+        <form action="/consent" method="post">
+          <input type="hidden" name="client_id" value="<%= client.id %>">
+          <input type="hidden" name="state" value="<%= state %>">
+          <button type="submit" class="contrast">Allow</button>
+        </form>
+
+      </div>
+    </main>
+
+  </body>
+</html>
