@@ -45,6 +45,7 @@
           <form action="/login/password" method="post">
             <input type="text" name="username" placeholder="Username">
             <input type="password" name="password" placeholder="Password">
+            <input type="hidden" name="state" value="<%= state %>">
             <button type="submit" class="contrast">Sign in</button>
           </form>
         </div>

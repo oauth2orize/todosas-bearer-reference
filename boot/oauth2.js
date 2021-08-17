@@ -18,5 +18,11 @@ module.exports = function() {
       });
     });
   });
+  
+  as.deserializeClient(function(client, cb) {
+    process.nextTick(function() {
+      return cb(null, client);
+    });
+  });
 
 };
