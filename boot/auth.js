@@ -60,7 +60,7 @@ module.exports = function() {
         var client = {
           id: row.id.toString(),
           secret: row.secret,
-          redirectURI: row.redirectURI
+          redirectURI: row.redirect_uri
         };
         return cb(null, client);
       });
