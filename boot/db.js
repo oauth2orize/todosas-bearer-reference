@@ -33,6 +33,13 @@ module.exports = function() {
     scope TEXT \
   )");
   
+  db.run("CREATE TABLE IF NOT EXISTS access_tokens ( \
+    token TEXT UNIQUE NOT NULL, \
+    client_id INTEGER NOT NULL, \
+    user_id INTEGER NOT NULL, \
+    scope TEXT \
+  )");
+  
   // TODO: Only do this if not exists
   db.run('INSERT INTO clients (secret, redirect_uri, name) VALUES (?, ?, ?)', [
     '7Fjfp0ZBr1KtDRbnfVdmIw',

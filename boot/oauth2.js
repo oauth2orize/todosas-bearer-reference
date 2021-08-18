@@ -24,7 +24,7 @@ module.exports = function() {
         redirectURI,
         user.id
       ], function(err) {
-        if (err) { return next(err); }
+        if (err) { return cb(err); }
         return cb(null, code);
       });
     });
@@ -36,7 +36,30 @@ module.exports = function() {
     console.log(code);
     console.log(redirectURI);
     
-    return cb(null, '3foe3');
+    db.get('SELECT rowid AS id, * FROM authorization_codes WHERE code = ?', [
+      code
+    ], function(err, row) {
+      console.log(err);
+      console.log(row);
+      
+      if (err) { return next(err); }
+      if (!row) { return cb(null, false); }
+      
+      crypto.randomBytes(64, function(err, buffer) {
+        if (err) { return cb(err); }
+      
+        var token = buffer.toString('base64');
+      
+        db.run('INSERT INTO access_tokens (token, client_id, user_id) VALUES (?, ?, ?)', [
+          token,
+          row.client_id,
+          row.user_id
+        ], function(err) {
+          if (err) { return cb(err); }
+          return cb(null, token);
+        });
+      });
+    });
   }));
   
   as.serializeClient(function(client, cb) {
