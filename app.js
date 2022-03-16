@@ -14,7 +14,6 @@ var usersRouter = require('./routes/users');
 
 var app = express();
 
-require('./boot/db')();
 require('./boot/auth')();
 require('./boot/oauth2')();
 
