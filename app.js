@@ -11,7 +11,6 @@ var logger = require('morgan');
 // allowing it to inherit from session.Store
 var SQLiteStore = require('connect-sqlite3')(session);
 
-var indexRouter = require('./routes/index');
 var authRouter = require('./routes/auth');
 var consentRouter = require('./routes/consent');
 var userinfoRouter = require('./routes/userinfo');
@@ -59,7 +58,6 @@ app.use(function(req, res, next) {
   next();
 });
 
-app.use('/', indexRouter);
 app.use('/', authRouter);
 app.use('/consent', consentRouter);
 app.use('/oauth2', oauth2Router);
