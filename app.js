@@ -21,7 +21,6 @@ var usersRouter = require('./routes/users');
 var app = express();
 
 require('./boot/auth')();
-require('./boot/oauth2')();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -59,8 +58,8 @@ app.use(function(req, res, next) {
 });
 
 app.use('/', authRouter);
-app.use('/consent', consentRouter);
 app.use('/oauth2', oauth2Router);
+app.use('/consent', consentRouter);
 app.use('/myaccount', myaccountRouter);
 app.use('/users', usersRouter);
 app.use('/userinfo', userinfoRouter);
