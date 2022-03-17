@@ -110,7 +110,7 @@ function evaluate(client, user, scope, cb) {
   });
 }
 
-function prompt(req, res, next) {
+function interact(req, res, next) {
   req.session.returnTo = url.resolve(req.originalUrl, 'continue?' +  qs.stringify({ transaction_id: req.oauth2.transactionID }));
   
   var prompt = req.oauth2.locals.prompt;
@@ -140,9 +140,9 @@ router.get('/authorize', as.authorize(function validate(clientID, redirectURI, c
     if (client.redirectURI != redirectURI) { return cb(null, false); }
     return cb(null, client, client.redirectURI);
   });
-}, evaluate), prompt);
+}, evaluate), interact);
 
-router.get('/continue', as.resume(evaluate), prompt);
+router.get('/continue', as.resume(evaluate), interact);
 
 router.post('/token',
   passport.authenticate(['basic', 'oauth2-client-password'], { session: false }),
