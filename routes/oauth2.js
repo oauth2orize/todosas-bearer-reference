@@ -1,4 +1,5 @@
 var express = require('express');
+var url = require('url');
 var qs = require('querystring');
 var oauth2orize = require('oauth2orize');
 var passport = require('passport');
@@ -110,14 +111,12 @@ function evaluate(client, user, scope, cb) {
 }
 
 function prompt(req, res, next) {
-  console.log('TODO: prompt');
-  console.log(req.oauth2)
-  console.log(req.oauth2.info);
+  req.session.returnTo = url.resolve(req.originalUrl, 'continue?' +  qs.stringify({ transaction_id: req.oauth2.transactionID }));
   
   var prompt = req.oauth2.locals.prompt;
   switch (prompt) {
   case 'login':
-    return res.redirect('/login?' + qs.stringify({ state: req.oauth2.transactionID }));
+    return res.redirect('/login');
   case 'consent':
     return res.redirect('/consent?' + qs.stringify({ client_id: req.oauth2.client.id, state: req.oauth2.transactionID }));
   }

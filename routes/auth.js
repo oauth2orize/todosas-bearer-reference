@@ -71,7 +71,7 @@ var router = express.Router();
  * sent to the `POST /login/password` route.
  */
 router.get('/login', function(req, res, next) {
-  res.render('login', { state: req.query.state });
+  res.render('login');
 });
 
 /* POST /login/password
@@ -91,14 +91,10 @@ router.get('/login', function(req, res, next) {
  * a message informing them of what went wrong.
  */
 router.post('/login/password', passport.authenticate('local', {
+  successReturnToOrRedirect: '/',
   failureRedirect: '/login',
   failureMessage: true
-}), function(req, res, next) {
-  if (req.body.state) {
-    return res.redirect('/oauth2/continue?'+ qs.stringify({ transaction_id: req.body.state }));
-  }
-  res.redirect('/');
-});
+}));
 
 /* POST /logout
  *
