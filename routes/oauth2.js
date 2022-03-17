@@ -3,9 +3,10 @@ var qs = require('querystring');
 var oauth2orize = require('oauth2orize');
 var passport = require('passport');
 var crypto = require('crypto');
-var as = require('../as');
 var db = require('../db');
 
+
+var as = oauth2orize.createServer();
 
 as.grant(oauth2orize.grant.code(function(client, redirectURI, user, ares, cb) {
   console.log('TODO: code grant');
