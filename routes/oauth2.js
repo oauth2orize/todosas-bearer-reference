@@ -86,7 +86,7 @@ function evaluate(client, user, scope, cb) {
   console.log(user);
   console.log(scope);
   
-  if (!user) { return cb(null, false, { prompt: 'login'} ); }
+  if (!user) { return cb(null, false, undefined, { prompt: 'login'} ); }
   
   console.log('DO WE HAVE CONSENT?');
   
@@ -98,7 +98,7 @@ function evaluate(client, user, scope, cb) {
     console.log(row);
     
     if (err) { return next(err); }
-    if (!row) { return cb(null, false, { prompt: 'consent' }); }
+    if (!row) { return cb(null, false, undefined, { prompt: 'consent' }); }
     
     var grant = {
       id: row.id.toString(),
@@ -114,7 +114,7 @@ function prompt(req, res, next) {
   console.log(req.oauth2)
   console.log(req.oauth2.info);
   
-  var prompt = req.oauth2.info.prompt;
+  var prompt = req.oauth2.locals.prompt;
   switch (prompt) {
   case 'login':
     return res.redirect('/login?' + qs.stringify({ state: req.oauth2.transactionID }));
@@ -127,7 +127,7 @@ function prompt(req, res, next) {
 var router = express.Router();
 
 // http://localhost:3000/oauth2/authorize?response_type=code&client_id=1&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Foauth2%2Fredirect
-router.get('/authorize', as.authorize(function(clientID, redirectURI, cb) {
+router.get('/authorize', as.authorize(function validate(clientID, redirectURI, cb) {
   db.get('SELECT * FROM clients WHERE id = ?', [ clientID ], function(err, row) {
     if (err) { return cb(err); }
   
@@ -135,8 +135,8 @@ router.get('/authorize', as.authorize(function(clientID, redirectURI, cb) {
   
     var client = {
       id: row.id.toString(),
-      redirectURI: row.redirect_uri,
-      name: row.name
+      name: row.name,
+      redirectURI: row.redirect_uri
     };
     if (client.redirectURI != redirectURI) { return cb(null, false); }
     return cb(null, client, client.redirectURI);
