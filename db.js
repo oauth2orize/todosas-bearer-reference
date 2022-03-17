@@ -15,6 +15,7 @@ db.serialize(function() {
   )");
   
   db.run("CREATE TABLE IF NOT EXISTS clients ( \
+    id INTEGER PRIMARY KEY, \
     secret TEXT, \
     name TEXT NOT NULL, \
     redirect_uri TEXT \
@@ -55,8 +56,8 @@ db.serialize(function() {
   // TODO: Only do this if client does not already exist
   db.run('INSERT OR IGNORE INTO clients (secret, redirect_uri, name) VALUES (?, ?, ?)', [
     '7Fjfp0ZBr1KtDRbnfVdmIw',
-    'http://localhost:3000/return',
-    'My Example Client'
+    'http://localhost:3000/oauth2/redirect',
+    'TodoMVC'
   ]);
 });
 
