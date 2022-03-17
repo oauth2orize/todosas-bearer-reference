@@ -6,7 +6,7 @@ var db = require('../db');
 var router = express.Router();
 
 /* GET users listing. */
-router.get('/',
+router.get('/consent',
   ensureLoggedIn(),
   function(req, res, next) {
     db.get('SELECT rowid AS id, redirect_uri, name FROM clients WHERE rowid = ?', [ req.query.client_id ], function(err, row) {
@@ -22,7 +22,7 @@ router.get('/',
     });
   });
 
-router.post('/',
+router.post('/consent',
   function(req, res, next) {
     console.log('CREATE GRANT');
     console.log(req.user);

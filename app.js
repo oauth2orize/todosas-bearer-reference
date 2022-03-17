@@ -12,7 +12,7 @@ var logger = require('morgan');
 var SQLiteStore = require('connect-sqlite3')(session);
 
 var authRouter = require('./routes/auth');
-var consentRouter = require('./routes/consent');
+var authzRouter = require('./routes/authz');
 var userinfoRouter = require('./routes/userinfo');
 var oauth2Router = require('./routes/oauth2');
 var myaccountRouter = require('./routes/myaccount');
@@ -58,8 +58,8 @@ app.use(function(req, res, next) {
 });
 
 app.use('/', authRouter);
+app.use('/', authzRouter);
 app.use('/oauth2', oauth2Router);
-app.use('/consent', consentRouter);
 app.use('/myaccount', myaccountRouter);
 app.use('/users', usersRouter);
 app.use('/userinfo', userinfoRouter);
