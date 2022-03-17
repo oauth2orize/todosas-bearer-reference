@@ -118,7 +118,7 @@ function interact(req, res, next) {
   case 'login':
     return res.redirect('/login');
   case 'consent':
-    return res.redirect('/consent?' + qs.stringify({ client_id: req.oauth2.client.id, state: req.oauth2.transactionID }));
+    return res.redirect('/consent?' + qs.stringify({ client_id: req.oauth2.client.id }));
   }
 }
 
@@ -132,6 +132,7 @@ router.get('/authorize', as.authorize(function validate(clientID, redirectURI, c
   
     // TODO: Handle undefined row.
   
+    // TODO: don't do toString here
     var client = {
       id: row.id.toString(),
       name: row.name,
