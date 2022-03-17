@@ -127,23 +127,21 @@ function prompt(req, res, next) {
 var router = express.Router();
 
 // http://localhost:3000/oauth2/authorize?response_type=code&client_id=1&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Foauth2%2Fredirect
-router.get('/authorize',
-  as.authorize(function(clientID, redirectURI, cb) {
-    db.get('SELECT * FROM clients WHERE id = ?', [ clientID ], function(err, row) {
-      if (err) { return cb(err); }
-    
-      // TODO: Handle undefined row.
-    
-      var client = {
-        id: row.id.toString(),
-        redirectURI: row.redirect_uri,
-        name: row.name
-      };
-      if (client.redirectURI != redirectURI) { return cb(null, false); }
-      return cb(null, client, client.redirectURI);
-    });
-  }, evaluate),
-  prompt);
+router.get('/authorize', as.authorize(function(clientID, redirectURI, cb) {
+  db.get('SELECT * FROM clients WHERE id = ?', [ clientID ], function(err, row) {
+    if (err) { return cb(err); }
+  
+    // TODO: Handle undefined row.
+  
+    var client = {
+      id: row.id.toString(),
+      redirectURI: row.redirect_uri,
+      name: row.name
+    };
+    if (client.redirectURI != redirectURI) { return cb(null, false); }
+    return cb(null, client, client.redirectURI);
+  });
+}, evaluate), prompt);
 
 router.get('/continue', as.resume(evaluate), prompt);
 
