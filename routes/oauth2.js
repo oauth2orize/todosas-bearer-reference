@@ -16,13 +16,16 @@ as.grant(oauth2orize.grant.code(function(client, redirectURI, user, ares, cb) {
   console.log(user);
   console.log(ares);
   
+  var grant = ares.grant;
+  
   crypto.randomBytes(32, function(err, buffer) {
     if (err) { return cb(err); }
     var code = buffer.toString('base64');
-    db.run('INSERT INTO authorization_codes (client_id, redirect_uri, user_id, value) VALUES (?, ?, ?, ?)', [
+    db.run('INSERT INTO authorization_codes (client_id, redirect_uri, user_id, grant_id, value) VALUES (?, ?, ?, ?, ?)', [
       client.id,
       redirectURI,
       user.id,
+      grant.id,
       code
     ], function(err) {
       if (err) { return cb(err); }

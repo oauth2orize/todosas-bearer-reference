@@ -32,7 +32,9 @@ db.serialize(function() {
     client_id INTEGER NOT NULL, \
     redirect_uri TEXT, \
     user_id INTEGER NOT NULL, \
+    grant_id INTEGER NOT NULL, \
     scope TEXT, \
+    issued_at DATETIME DEFAULT CURRENT_TIMESTAMP, \
     expires_at DATETIME, \
     value TEXT UNIQUE NOT NULL \
   )");
