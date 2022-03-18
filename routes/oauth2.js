@@ -78,17 +78,12 @@ as.exchange(oauth2orize.exchange.code(function(client, code, redirectURI, cb) {
   db.get('SELECT * FROM authorization_codes WHERE value = ?', [
     code
   ], function(err, row) {
-    console.log(err);
-    console.log(row);
-    
     if (err) { return cb(err); }
     if (!row) { return cb(null, false); }
     
     crypto.randomBytes(64, function(err, buffer) {
       if (err) { return cb(err); }
-    
       var token = buffer.toString('base64');
-    
       db.run('INSERT INTO access_tokens (user_id, client_id, value) VALUES (?, ?, ?)', [
         row.user_id,
         row.client_id,
