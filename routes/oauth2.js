@@ -18,7 +18,6 @@ passport.use(new HTTPBasicStrategy(function verify(clientID, clientSecret, cb) {
     }
     var client = {
       id: row.id,
-      secret: row.secret,
       name: row.name,
       redirectURI: row.redirect_uri
     };
@@ -35,7 +34,6 @@ passport.use(new OAuth2ClientPasswordStrategy(function verify(clientID, clientSe
     }
     var client = {
       id: row.id,
-      secret: row.secret,
       name: row.name,
       redirectURI: row.redirect_uri
     };
@@ -165,9 +163,8 @@ router.get('/authorize', as.authorize(function validate(clientID, redirectURI, c
   
     // TODO: Handle undefined row.
   
-    // TODO: don't do toString here
     var client = {
-      id: row.id.toString(),
+      id: row.id,
       name: row.name,
       redirectURI: row.redirect_uri
     };
