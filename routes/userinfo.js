@@ -27,7 +27,7 @@ router.get('/',
     console.log('RETURN USER INFO');
     console.log(req.user);
     
-    db.get('SELECT rowid AS id, username, name FROM users WHERE rowid = ?', [ req.user.id ], function(err, row) {
+    db.get('SELECT * FROM users WHERE id = ?', [ req.user.id ], function(err, row) {
       if (err) { return next(err); }
     
       // TODO: Handle undefined row.
