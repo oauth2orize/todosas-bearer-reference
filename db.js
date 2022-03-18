@@ -64,6 +64,12 @@ db.serialize(function() {
     'TodoMVC',
     'http://localhost:3000/oauth2/redirect'
   ]);
+  
+  db.run('INSERT OR IGNORE INTO clients (id, name, redirect_uri) VALUES (?, ?, ?)', [
+    2,
+    'TodoMVC',
+    'http://localhost:3000/'
+  ]);
 });
 
 module.exports = db;
