@@ -57,11 +57,12 @@ db.serialize(function() {
     salt
   ]);
   
-  // TODO: Only do this if client does not already exist
-  db.run('INSERT OR IGNORE INTO clients (secret, redirect_uri, name) VALUES (?, ?, ?)', [
+  // create an initial client (client ID: 1, client secret: 7Fjfp0ZBr1KtDRbnfVdmIw)
+  db.run('INSERT OR IGNORE INTO clients (id, secret, name, redirect_uri) VALUES (?, ?, ?, ?)', [
+    1,
     '7Fjfp0ZBr1KtDRbnfVdmIw',
-    'http://localhost:3000/oauth2/redirect',
-    'TodoMVC'
+    'TodoMVC',
+    'http://localhost:3000/oauth2/redirect'
   ]);
 });
 
