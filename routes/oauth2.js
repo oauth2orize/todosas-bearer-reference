@@ -18,22 +18,17 @@ passport.use(new HTTPBasicStrategy(
 ));
 
 passport.use(new OAuth2ClientPasswordStrategy(
-  function(clientId, clientSecret, cb) {
-    console.log('auth client password');
-    console.log(clientId);
-    console.log(clientSecret);
-    
-    db.get('SELECT rowid AS id, secret, redirect_uri FROM clients WHERE rowid = ?', [ clientId ], function(err, row) {
+  function(clientID, clientSecret, cb) {
+    db.get('SELECT * FROM clients WHERE id = ?', [ clientID ], function(err, row) {
       if (err) { return next(err); }
       if (!row) { return cb(null, false); }
-      
       if (!crypto.timingSafeEqual(Buffer.from(row.secret), Buffer.from(clientSecret))) {
-        return cb(null, false, { message: 'Incorrect username or password.' });
+        return cb(null, false);
       }
-  
       var client = {
-        id: row.id.toString(),
+        id: row.id,
         secret: row.secret,
+        name: row.name,
         redirectURI: row.redirect_uri
       };
       return cb(null, client);
