@@ -60,6 +60,14 @@ passport.deserializeUser(function(user, cb) {
 });
 
 
+var messages = function(req, res, next) {
+  var msgs = req.session.messages || [];
+  res.locals.messages = msgs;
+  res.locals.hasMessages = !! msgs.length;
+  req.session.messages = [];
+  next();
+}
+
 var router = express.Router();
 
 /* GET /login
@@ -70,7 +78,7 @@ var router = express.Router();
  * username and password.  When the user submits the form, a request will be
  * sent to the `POST /login/password` route.
  */
-router.get('/login', csrf(), function(req, res, next) {
+router.get('/login', csrf(), messages, function(req, res, next) {
   res.render('login', { csrfToken: req.csrfToken() });
 });
 
@@ -113,7 +121,7 @@ router.post('/logout', csrf(), function(req, res, next) {
  * desired username and password.  When the user submits the form, a request
  * will be sent to the `POST /signup` route.
  */
-router.get('/signup', csrf(), function(req, res, next) {
+router.get('/signup', csrf(), messages, function(req, res, next) {
   res.render('signup', { csrfToken: req.csrfToken() });
 });
 
