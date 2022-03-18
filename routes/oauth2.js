@@ -45,7 +45,7 @@ passport.use(new OAuth2ClientPasswordStrategy(function verify(clientID, clientSe
 
 var as = oauth2orize.createServer();
 
-as.grant(oauth2orize.grant.code(function(client, redirectURI, user, ares, cb) {
+as.grant(oauth2orize.grant.code(function issue(client, redirectURI, user, ares, cb) {
   var grant = ares.grant;
   
   crypto.randomBytes(32, function(err, buffer) {
@@ -64,7 +64,7 @@ as.grant(oauth2orize.grant.code(function(client, redirectURI, user, ares, cb) {
   });
 }));
 
-as.exchange(oauth2orize.exchange.code(function(client, code, redirectURI, cb) {
+as.exchange(oauth2orize.exchange.code(function issue(client, code, redirectURI, cb) {
   db.get('SELECT * FROM authorization_codes WHERE value = ?', [
     code
   ], function(err, row) {
