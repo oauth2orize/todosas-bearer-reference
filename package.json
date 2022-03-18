@@ -1,23 +1,33 @@
 {
-  "name": "express-4.x-oauth2orize-example",
+  "name": "todosas",
   "version": "0.0.0",
-  "description": "Express 4.x app using OAuth2orize for authorization.",
+  "private": true,
+  "description": "OAuth 2.0 authorization server using Express and OAuth2orize to issue tokens.",
   "keywords": [
     "example",
     "express",
     "oauth2orize",
-    "passport"
+    "passport",
+    "sqlite"
   ],
-  "author": "Jared Hanson",
-  "license": "Unlicense",
-  "homepage": "https://github.com/jaredhanson/express-4.x-oauth2orize-example",
+  "author": {
+    "name": "Jared Hanson",
+    "email": "jaredhanson@gmail.com",
+    "url": "https://www.jaredhanson.me/"
+  },
+  "homepage": "https://github.com/oauth2orize/todosas",
   "repository": {
     "type": "git",
-    "url": "git://github.com/jaredhanson/express-4.x-oauth2orize-example.git"
+    "url": "git://github.com/oauth2orize/todosas.git"
   },
   "bugs": {
-    "url": "https://github.com/jaredhanson/express-4.x-oauth2orize-example/issues"
+    "url": "https://github.com/oauth2orize/todosas/issues"
   },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/jaredhanson"
+  },
+  "license": "Unlicense",
   "scripts": {
     "start": "node ./bin/www"
   },
