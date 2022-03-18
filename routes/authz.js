@@ -20,31 +20,30 @@ router.get('/consent', ensureLoggedIn, function(req, res, next) {
   });
 });
 
-router.post('/consent', ensureLoggedIn,
-  function(req, res, next) {
-    console.log('CREATE GRANT');
-    console.log(req.user);
-    console.log(req.body);
-  
-    db.run('INSERT INTO grants (user_id, client_id) VALUES (?, ?)', [
-      req.user.id,
-      req.body.client_id
-    ], function(err) {
-      if (err) { return next(err); }
-      
-      var grant = {
-        id: this.lastID.toString(),
-        userID: req.user.id,
-        clientID: req.body.client_id
-      };
-      
-      console.log('CREATED GRANT!');
-      console.log(grant);
-      
-      if (req.body.state) {
-        return res.redirect('/oauth2/continue?'+ qs.stringify({ transaction_id: req.body.state }));
-      }
-    });
+router.post('/consent', ensureLoggedIn, function(req, res, next) {
+  console.log('CREATE GRANT');
+  console.log(req.user);
+  console.log(req.body);
+
+  db.run('INSERT INTO grants (user_id, client_id) VALUES (?, ?)', [
+    req.user.id,
+    req.body.client_id
+  ], function(err) {
+    if (err) { return next(err); }
+    
+    var grant = {
+      id: this.lastID.toString(),
+      userID: req.user.id,
+      clientID: req.body.client_id
+    };
+    
+    console.log('CREATED GRANT!');
+    console.log(grant);
+    
+    if (req.body.state) {
+      return res.redirect('/oauth2/continue?'+ qs.stringify({ transaction_id: req.body.state }));
+    }
   });
+});
 
 module.exports = router;
