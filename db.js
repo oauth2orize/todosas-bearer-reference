@@ -43,8 +43,9 @@ db.serialize(function() {
     user_id INTEGER NOT NULL, \
     client_id INTEGER NOT NULL, \
     scope TEXT, \
+    issued_at DATETIME DEFAULT CURRENT_TIMESTAMP, \
     expires_at DATETIME, \
-    token TEXT UNIQUE NOT NULL \
+    value TEXT UNIQUE NOT NULL \
   )");
   
   // create an initial user (username: alice, password: letmein)

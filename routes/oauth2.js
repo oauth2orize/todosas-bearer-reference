@@ -75,7 +75,7 @@ as.exchange(oauth2orize.exchange.code(function(client, code, redirectURI, cb) {
   console.log(code);
   console.log(redirectURI);
   
-  db.get('SELECT rowid AS id, * FROM authorization_codes WHERE code = ?', [
+  db.get('SELECT * FROM authorization_codes WHERE value = ?', [
     code
   ], function(err, row) {
     console.log(err);
@@ -89,10 +89,10 @@ as.exchange(oauth2orize.exchange.code(function(client, code, redirectURI, cb) {
     
       var token = buffer.toString('base64');
     
-      db.run('INSERT INTO access_tokens (token, client_id, user_id) VALUES (?, ?, ?)', [
-        token,
+      db.run('INSERT INTO access_tokens (user_id, client_id, value) VALUES (?, ?, ?)', [
+        row.user_id,
         row.client_id,
-        row.user_id
+        token,
       ], function(err) {
         if (err) { return cb(err); }
         return cb(null, token);
