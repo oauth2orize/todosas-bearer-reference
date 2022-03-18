@@ -17,24 +17,22 @@ passport.use(new HTTPBasicStrategy(
   }
 ));
 
-passport.use(new OAuth2ClientPasswordStrategy(
-  function(clientID, clientSecret, cb) {
-    db.get('SELECT * FROM clients WHERE id = ?', [ clientID ], function(err, row) {
-      if (err) { return next(err); }
-      if (!row) { return cb(null, false); }
-      if (!crypto.timingSafeEqual(Buffer.from(row.secret), Buffer.from(clientSecret))) {
-        return cb(null, false);
-      }
-      var client = {
-        id: row.id,
-        secret: row.secret,
-        name: row.name,
-        redirectURI: row.redirect_uri
-      };
-      return cb(null, client);
-    });
-  }
-));
+passport.use(new OAuth2ClientPasswordStrategy(function verify(clientID, clientSecret, cb) {
+  db.get('SELECT * FROM clients WHERE id = ?', [ clientID ], function(err, row) {
+    if (err) { return next(err); }
+    if (!row) { return cb(null, false); }
+    if (!crypto.timingSafeEqual(Buffer.from(row.secret), Buffer.from(clientSecret))) {
+      return cb(null, false);
+    }
+    var client = {
+      id: row.id,
+      secret: row.secret,
+      name: row.name,
+      redirectURI: row.redirect_uri
+    };
+    return cb(null, client);
+  });
+}));
 
 
 var as = oauth2orize.createServer();
