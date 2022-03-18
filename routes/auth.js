@@ -1,5 +1,5 @@
 var express = require('express');
-var qs = require('querystring');
+var csrf = require('csurf');
 var passport = require('passport');
 var LocalStrategy = require('passport-local');
 var crypto = require('crypto');
@@ -70,7 +70,7 @@ var router = express.Router();
  * username and password.  When the user submits the form, a request will be
  * sent to the `POST /login/password` route.
  */
-router.get('/login', function(req, res, next) {
+router.get('/login', csrf(), function(req, res, next) {
   res.render('login');
 });
 
@@ -90,7 +90,7 @@ router.get('/login', function(req, res, next) {
  * When authentication fails, the user will be re-prompted to login and shown
  * a message informing them of what went wrong.
  */
-router.post('/login/password', passport.authenticate('local', {
+router.post('/login/password', csrf(), passport.authenticate('local', {
   successReturnToOrRedirect: '/',
   failureRedirect: '/login',
   failureMessage: true
@@ -100,7 +100,7 @@ router.post('/login/password', passport.authenticate('local', {
  *
  * This route logs the user out.
  */
-router.get('/logout', function(req, res, next) {
+router.post('/logout', csrf(), function(req, res, next) {
   req.logout();
   res.redirect('/');
 });
@@ -113,7 +113,7 @@ router.get('/logout', function(req, res, next) {
  * desired username and password.  When the user submits the form, a request
  * will be sent to the `POST /signup` route.
  */
-router.get('/signup', function(req, res, next) {
+router.get('/signup', csrf(), function(req, res, next) {
   res.render('signup');
 });
 
@@ -126,7 +126,7 @@ router.get('/signup', function(req, res, next) {
  * then a new user record is inserted into the database.  If the record is
  * successfully created, the user is logged in.
  */
-router.post('/signup', function(req, res, next) {
+router.post('/signup', csrf(), function(req, res, next) {
   var salt = crypto.randomBytes(16);
   crypto.pbkdf2(req.body.password, salt, 310000, 32, 'sha256', function(err, hashedPassword) {
     if (err) { return next(err); }

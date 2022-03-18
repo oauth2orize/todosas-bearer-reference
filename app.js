@@ -43,7 +43,6 @@ app.use(function(req, res, next) {
   console.log(req.session)
   next();
 });
-app.use(csrf());
 app.use(passport.authenticate('session'));
 app.use(function(req, res, next) {
   var msgs = req.session.messages || [];
@@ -53,6 +52,7 @@ app.use(function(req, res, next) {
   next();
 });
 app.use(function(req, res, next) {
+  if (!req.csrfToken) { return next(); }
   res.locals.csrfToken = req.csrfToken();
   next();
 });
