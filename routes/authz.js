@@ -1,3 +1,4 @@
+var createError = require('http-errors');
 var express = require('express');
 var csrf = require('csurf');
 var ensureLogIn = require('connect-ensure-login').ensureLoggedIn;
@@ -10,8 +11,7 @@ var router = express.Router();
 router.get('/consent', csrf(), ensureLoggedIn, function(req, res, next) {
   db.get('SELECT * FROM clients WHERE id = ?', [ req.query.client_id ], function(err, row) {
     if (err) { return cb(err); }
-  
-    // TODO: Handle undefined row.
+    if (!row) { return next(createError(400, 'Unknown client "' + req.query.client_id + '"')); }
     var client = {
       id: row.id,
       name: row.name
