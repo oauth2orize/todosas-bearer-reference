@@ -1,3 +1,4 @@
+var createError = require('http-errors');
 var express = require('express');
 var url = require('url');
 var qs = require('querystring');
@@ -99,11 +100,6 @@ as.deserializeClient(function(client, cb) {
 
 
 function evaluate(client, user, scope, cb) {
-  console.log('TODO: evaluate');
-  console.log(client);
-  console.log(user);
-  console.log(scope);
-  
   if (!user) { return cb(null, false, undefined, { prompt: 'login'} ); }
   
   db.get('SELECT * FROM grants WHERE user_id = ? AND client_id = ?', [
@@ -141,9 +137,7 @@ var router = express.Router();
 router.get('/authorize', as.authorize(function validate(clientID, redirectURI, cb) {
   db.get('SELECT * FROM clients WHERE id = ?', [ clientID ], function(err, row) {
     if (err) { return cb(err); }
-  
-    // TODO: Handle undefined row.
-  
+    if (!row) { return cb(createError(400, 'Unknown client "' + clientID + '"')); }
     var client = {
       id: row.id,
       name: row.name,
