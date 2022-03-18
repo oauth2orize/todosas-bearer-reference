@@ -3,7 +3,6 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
-var csrf = require('csurf');
 var passport = require('passport');
 var logger = require('morgan');
 
@@ -13,8 +12,8 @@ var SQLiteStore = require('connect-sqlite3')(session);
 
 var authRouter = require('./routes/auth');
 var authzRouter = require('./routes/authz');
-var userinfoRouter = require('./routes/userinfo');
 var oauth2Router = require('./routes/oauth2');
+var userinfoRouter = require('./routes/userinfo');
 
 var app = express();
 
