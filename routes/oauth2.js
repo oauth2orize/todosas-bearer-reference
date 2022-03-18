@@ -3,8 +3,43 @@ var url = require('url');
 var qs = require('querystring');
 var oauth2orize = require('oauth2orize');
 var passport = require('passport');
+var HTTPBasicStrategy = require('passport-http').BasicStrategy;
+var OAuth2ClientPasswordStrategy = require('passport-oauth2-client-password');
 var crypto = require('crypto');
 var db = require('../db');
+
+
+passport.use(new HTTPBasicStrategy(
+  function(userid, password, done) {
+    console.log('auth basic');
+    console.log(userid);
+    console.log(password);
+  }
+));
+
+passport.use(new OAuth2ClientPasswordStrategy(
+  function(clientId, clientSecret, cb) {
+    console.log('auth client password');
+    console.log(clientId);
+    console.log(clientSecret);
+    
+    db.get('SELECT rowid AS id, secret, redirect_uri FROM clients WHERE rowid = ?', [ clientId ], function(err, row) {
+      if (err) { return next(err); }
+      if (!row) { return cb(null, false); }
+      
+      if (!crypto.timingSafeEqual(Buffer.from(row.secret), Buffer.from(clientSecret))) {
+        return cb(null, false, { message: 'Incorrect username or password.' });
+      }
+  
+      var client = {
+        id: row.id.toString(),
+        secret: row.secret,
+        redirectURI: row.redirect_uri
+      };
+      return cb(null, client);
+    });
+  }
+));
 
 
 var as = oauth2orize.createServer();
@@ -46,7 +81,7 @@ as.exchange(oauth2orize.exchange.code(function(client, code, redirectURI, cb) {
     console.log(err);
     console.log(row);
     
-    if (err) { return next(err); }
+    if (err) { return cb(err); }
     if (!row) { return cb(null, false); }
     
     crypto.randomBytes(64, function(err, buffer) {
