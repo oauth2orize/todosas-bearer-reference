@@ -91,7 +91,7 @@ function evaluate(client, user, scope, cb) {
   
   console.log('DO WE HAVE CONSENT?');
   
-  db.get('SELECT rowid AS id, * FROM grants WHERE user_id = ? AND client_id = ?', [
+  db.get('SELECT * FROM grants WHERE user_id = ? AND client_id = ?', [
     user.id,
     client.id
   ], function(err, row) {
@@ -102,7 +102,7 @@ function evaluate(client, user, scope, cb) {
     if (!row) { return cb(null, false, undefined, { prompt: 'consent' }); }
     
     var grant = {
-      id: row.id.toString(),
+      id: row.id,
       userID: row.user_id,
       clientID: row.client_id
     };

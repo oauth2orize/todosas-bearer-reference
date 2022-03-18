@@ -22,10 +22,10 @@ db.serialize(function() {
   )");
   
   db.run("CREATE TABLE IF NOT EXISTS grants ( \
+    id INTEGER PRIMARY KEY, \
     user_id INTEGER NOT NULL, \
     client_id INTEGER NOT NULL, \
-    scope TEXT, \
-    PRIMARY KEY (user_id, client_id) \
+    scope TEXT \
   )");
   
   db.run("CREATE TABLE IF NOT EXISTS authorization_codes ( \
