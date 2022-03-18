@@ -15,8 +15,6 @@ var authRouter = require('./routes/auth');
 var authzRouter = require('./routes/authz');
 var userinfoRouter = require('./routes/userinfo');
 var oauth2Router = require('./routes/oauth2');
-var myaccountRouter = require('./routes/myaccount');
-var usersRouter = require('./routes/users');
 
 var app = express();
 
@@ -53,8 +51,6 @@ app.use(function(req, res, next) {
 app.use('/', authRouter);
 app.use('/', authzRouter);
 app.use('/oauth2', oauth2Router);
-app.use('/myaccount', myaccountRouter);
-app.use('/users', usersRouter);
 app.use('/userinfo', userinfoRouter);
 
 // catch 404 and forward to error handler
