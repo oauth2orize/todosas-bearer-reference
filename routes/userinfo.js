@@ -1,7 +1,22 @@
 var express = require('express');
-var qs = require('querystring');
 var passport = require('passport');
+var HTTPBearerStrategy = require('passport-http-bearer');
 var db = require('../db');
+
+
+passport.use(new HTTPBearerStrategy(function verify(token, cb) {
+  db.get('SELECT * FROM access_tokens WHERE value = ?', [
+    token
+  ], function(err, row) {
+    if (err) { return cb(err); }
+    if (!row) { return cb(null, false); }
+    var user = {
+      id: row.user_id
+    };
+    // TODO: Pass scope as info
+    return cb(null, user);
+  });
+}));
 
 
 var router = express.Router();
