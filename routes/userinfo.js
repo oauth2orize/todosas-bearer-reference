@@ -21,28 +21,18 @@ passport.use(new HTTPBearerStrategy(function verify(token, cb) {
 
 var router = express.Router();
 
-router.get('/',
-  passport.authenticate('bearer', { session: false }),
-  function(req, res, next) {
-    console.log('RETURN USER INFO');
-    console.log(req.user);
-    
-    db.get('SELECT * FROM users WHERE id = ?', [ req.user.id ], function(err, row) {
-      if (err) { return next(err); }
-    
-      // TODO: Handle undefined row.
-    
-      var user = {
-        sub: row.id.toString(),
-        name: row.name,
-        preferred_username: row.username
-      };
-      console.log('userinfo')
-      console.log(user);
-      
-      res.json(user);
-    });
-    
+router.get('/', passport.authenticate('bearer', { session: false }), function(req, res, next) {
+  db.get('SELECT * FROM users WHERE id = ?', [ req.user.id ], function(err, row) {
+    if (err) { return next(err); }
+    // TODO: Handle undefined row.
+    var info = {
+      sub: row.id.toString()
+    };
+    // TODO: check scope
+    if (row.name) { info.name = row.name; }
+    if (row.username) { info.preferred_username = row.username; }
+    res.json(info);
   });
+});
 
 module.exports = router;
