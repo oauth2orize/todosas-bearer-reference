@@ -18,14 +18,12 @@ as.grant(oauth2orize.grant.code(function(client, redirectURI, user, ares, cb) {
   
   crypto.randomBytes(32, function(err, buffer) {
     if (err) { return cb(err); }
-    
     var code = buffer.toString('base64');
-    
-    db.run('INSERT INTO authorization_codes (code, client_id, redirect_uri, user_id) VALUES (?, ?, ?, ?)', [
-      code,
+    db.run('INSERT INTO authorization_codes (client_id, redirect_uri, user_id, value) VALUES (?, ?, ?, ?)', [
       client.id,
       redirectURI,
-      user.id
+      user.id,
+      code
     ], function(err) {
       if (err) { return cb(err); }
       return cb(null, code);
@@ -89,22 +87,17 @@ function evaluate(client, user, scope, cb) {
   
   if (!user) { return cb(null, false, undefined, { prompt: 'login'} ); }
   
-  console.log('DO WE HAVE CONSENT?');
-  
   db.get('SELECT * FROM grants WHERE user_id = ? AND client_id = ?', [
     user.id,
     client.id
   ], function(err, row) {
-    console.log(err);
-    console.log(row);
-    
     if (err) { return next(err); }
     if (!row) { return cb(null, false, undefined, { prompt: 'consent' }); }
-    
     var grant = {
       id: row.id,
       userID: row.user_id,
-      clientID: row.client_id
+      clientID: row.client_id,
+      scope: row.scope.split(' ')
     };
     return cb(null, true, { grant: grant });
   });
