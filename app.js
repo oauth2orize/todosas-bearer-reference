@@ -51,11 +51,6 @@ app.use(function(req, res, next) {
   req.session.messages = [];
   next();
 });
-app.use(function(req, res, next) {
-  if (!req.csrfToken) { return next(); }
-  res.locals.csrfToken = req.csrfToken();
-  next();
-});
 
 app.use('/', authRouter);
 app.use('/', authzRouter);

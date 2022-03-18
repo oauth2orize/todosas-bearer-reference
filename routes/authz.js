@@ -16,7 +16,7 @@ router.get('/consent', csrf(), ensureLoggedIn, function(req, res, next) {
       id: row.id,
       name: row.name
     };
-    res.render('consent', { user: req.user, client: client });
+    res.render('consent', { user: req.user, client: client, csrfToken: req.csrfToken() });
   });
 });
 

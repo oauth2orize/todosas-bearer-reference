@@ -71,7 +71,7 @@ var router = express.Router();
  * sent to the `POST /login/password` route.
  */
 router.get('/login', csrf(), function(req, res, next) {
-  res.render('login');
+  res.render('login', { csrfToken: req.csrfToken() });
 });
 
 /* POST /login/password
@@ -114,7 +114,7 @@ router.post('/logout', csrf(), function(req, res, next) {
  * will be sent to the `POST /signup` route.
  */
 router.get('/signup', csrf(), function(req, res, next) {
-  res.render('signup');
+  res.render('signup', { csrfToken: req.csrfToken() });
 });
 
 /* POST /signup
