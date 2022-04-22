@@ -48,7 +48,7 @@ router.get('/consent',
   function(req, res, next) {
     res.render('consent', {
       user: req.user,
-      scope: req.query.scope && req.query.scope.split(' '),
+      scope: req.query.scope ? req.query.scope.split(' ') : undefined,
       action: url.parse(req.originalUrl).pathname,
       csrfToken: req.csrfToken()
     });
@@ -88,7 +88,7 @@ router.get('/consent/:grantID',
   function(req, res, next) {
     res.render('consent', {
       user: req.user,
-      scope: req.query.scope && req.query.scope.split(' '),
+      scope: req.query.scope ? req.query.scope.split(' ') : undefined,
       action: url.parse(req.originalUrl).pathname,
       csrfToken: req.csrfToken()
     });

@@ -114,7 +114,7 @@ function evaluate(oauth2, cb) {
   
   async.waterfall([
     function login(next) {
-      if (!oauth2.user) { return cb(null, false, oauth2.info, { prompt: 'login'} ); }
+      if (!oauth2.user) { return cb(null, false, oauth2.info, { prompt: 'login' } ); }
       next();
     },
     function allowed(next) {
@@ -134,19 +134,26 @@ function evaluate(oauth2, cb) {
       });
     },
     function consent(next) {
-      if (oauth2.client.type !== 'confidential') { return cb(null, false, oauth2.info, { prompt: 'consent'} ); }
-      if (oauth2.req.type !== 'code') { return cb(null, false, oauth2.info, { prompt: 'consent'} ); }
+      if (oauth2.client.type !== 'confidential') { return cb(null, false, oauth2.info, { prompt: 'consent', scope: oauth2.req.scope } ); }
+      if (oauth2.req.type !== 'code') { return cb(null, false, oauth2.info, { prompt: 'consent', scope: oauth2.req.scope } ); }
       
       db.get('SELECT * FROM grants WHERE user_id = ? AND client_id = ?', [
         oauth2.user.id,
         oauth2.client.id
       ], function(err, row) {
         if (err) { return next(err); }
-        if (!row) { return cb(null, false, oauth2.info, { prompt: 'consent' }); }
+        if (!row) { return cb(null, false, oauth2.info, { prompt: 'consent', scope: oauth2.req.scope }); }
         var grant = {
           id: row.id,
           scope: row.scope ? row.scope.split(' ') : null
         };
+        
+        console.log('EXISTING SCOPE: ');
+        console.log(grant)
+        console.log('REQUESTED SCOPE');
+        console.log(oauth2.req)
+        
+        
         return cb(null, true, { grant: grant });
       });
     }
@@ -166,8 +173,8 @@ function interact(req, res, next) {
     return res.redirect('/login');
   case 'consent':
     query.client_id = req.oauth2.client.id;
-    if (req.oauth2.req.scope) {
-      query.scope = req.oauth2.req.scope.join(' ');
+    if (req.oauth2.locals.scope) {
+      query.scope = req.oauth2.locals.scope.join(' ');
     }
     return res.redirect('/consent?' + qs.stringify(query));
   }
@@ -197,7 +204,7 @@ router.get('/authorize',
 router.get('/continue',
   function(req, res, next) {
     res.locals.grantID = req.query.grant_id;
-    res.locals.scope = req.query.scope && req.query.scope.split(' ');
+    res.locals.scope = req.query.scope ? req.query.scope.split(' ') : undefined;
     next();
   },
   as.resume(evaluate),

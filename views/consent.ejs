@@ -22,7 +22,9 @@
 			<% } %>
 			<form action="<%= action %>" method="post">
 				<input type="hidden" name="client_id" value="<%= client.id %>">
+				<% if (scope) { %>
 				<input type="hidden" name="scope" value="<%= scope.join(' ') %>">
+				<% } %>
 				<input type="hidden" name="_csrf" value="<%= csrfToken %>">
 				<button type="submit">Allow</button>
 			</form>
