@@ -93,7 +93,7 @@ as.exchange(oauth2orize.exchange.code(function issue(client, code, redirectURI, 
 
 as.serializeClient(function(client, cb) {
   process.nextTick(function() {
-    cb(null, { id: client.id, name: client.name });
+    cb(null, { id: client.id, type: client.type, name: client.name });
   });
 });
 
@@ -106,6 +106,7 @@ as.deserializeClient(function(client, cb) {
 
 function evaluate(oauth2, cb) {
   console.log('** EVAL **');
+  console.log(oauth2.client);
   console.log(oauth2.req);
   console.log(oauth2.locals);
   console.log(oauth2.info);
@@ -113,7 +114,7 @@ function evaluate(oauth2, cb) {
   
   async.waterfall([
     function login(next) {
-      if (!oauth2.user) { return cb(null, false, { a: 'b' }, { prompt: 'login'} ); }
+      if (!oauth2.user) { return cb(null, false, oauth2.info, { prompt: 'login'} ); }
       next();
     },
     function consent(next) {
@@ -122,12 +123,12 @@ function evaluate(oauth2, cb) {
         oauth2.client.id
       ], function(err, row) {
         if (err) { return next(err); }
-        if (!row) { return cb(null, false, undefined, { prompt: 'consent' }); }
+        if (!row) { return cb(null, false, oauth2.info, { prompt: 'consent' }); }
         var grant = {
           id: row.id,
           userID: row.user_id,
           clientID: row.client_id,
-          scope: row.scope.split(' ')
+          scope: row.scope ? row.scope.split(' ') : null
         };
         return next(null, { grant: grant });
       });
@@ -142,18 +143,22 @@ function interact(req, res, next) {
   req.session.returnTo = url.resolve(req.originalUrl, 'continue?' +  qs.stringify({ transaction_id: req.oauth2.transactionID }));
   
   var prompt = req.oauth2.locals.prompt;
+  var query = {};
   switch (prompt) {
   case 'login':
     return res.redirect('/login');
   case 'consent':
-    return res.redirect('/consent?' + qs.stringify({ client_id: req.oauth2.client.id }));
+    query.client_id = req.oauth2.client.id;
+    if (req.oauth2.req.scope) {
+      query.scope = req.oauth2.req.scope.join(' ');
+    }
+    return res.redirect('/consent?' + qs.stringify(query));
   }
 }
 
 
 var router = express.Router();
 
-// http://localhost:3000/oauth2/authorize?response_type=code&client_id=1&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Foauth2%2Fredirect
 router.get('/authorize',
   as.authorize(function validate(clientID, redirectURI, cb) {
     db.get('SELECT * FROM clients WHERE id = ?', [ clientID ], function(err, row) {
@@ -161,6 +166,7 @@ router.get('/authorize',
       if (!row) { return cb(createError(400, 'Unknown client "' + clientID + '"')); }
       var client = {
         id: row.id,
+        type: row.secret ? 'confidential' : 'public',
         name: row.name,
         redirectURI: row.redirect_uri
       };
@@ -172,10 +178,8 @@ router.get('/authorize',
 
 router.get('/continue',
   function(req, res, next) {
-    console.log('LOAD STUFF...');
-    
-    res.locals.foo = 'bar';
-    
+    res.locals.grantID = req.query.grant_id;
+    res.locals.scope = req.query.scope;
     next();
   },
   as.resume(evaluate),
