@@ -27,6 +27,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(session({
+  name: 'id.sid',
   secret: 'keyboard cat',
   resave: false, // don't save session if unmodified
   saveUninitialized: false, // don't create session until something stored
