@@ -11,8 +11,15 @@
 	<body>
 		<section class="prompt">
 			<h3>todos</h3>
-			<h1>Consent</h1>
-			<p>Do you want to allow <%= client.name %> to access your account?</p>
+			<h2><%= client.name %> wants to access your account</h2>
+			<% if (scope) { %>
+			<p class="instructions">This will allow <%= client.name %> access to:</p>
+			<ul class="scope">
+				<% scope.forEach(function(value) { %>
+				<li><%= value %></li>
+				<% }); %>
+			</ul>
+			<% } %>
 			<form action="/consent" method="post">
 				<input type="hidden" name="client_id" value="<%= client.id %>">
 				<input type="hidden" name="_csrf" value="<%= csrfToken %>">
