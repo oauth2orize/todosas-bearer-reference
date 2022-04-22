@@ -10,7 +10,7 @@ var crypto = require('crypto');
 var db = require('../db');
 
 
-passport.use(new HTTPBasicStrategy(function verify(clientID, clientSecret, cb) {
+function verify(clientID, clientSecret, cb) {
   db.get('SELECT * FROM clients WHERE id = ?', [ clientID ], function(err, row) {
     if (err) { return next(err); }
     if (!row) { return cb(null, false); }
@@ -24,23 +24,10 @@ passport.use(new HTTPBasicStrategy(function verify(clientID, clientSecret, cb) {
     };
     return cb(null, client);
   });
-}));
+};
 
-passport.use(new OAuth2ClientPasswordStrategy(function verify(clientID, clientSecret, cb) {
-  db.get('SELECT * FROM clients WHERE id = ?', [ clientID ], function(err, row) {
-    if (err) { return next(err); }
-    if (!row) { return cb(null, false); }
-    if (!crypto.timingSafeEqual(Buffer.from(row.secret), Buffer.from(clientSecret))) {
-      return cb(null, false);
-    }
-    var client = {
-      id: row.id,
-      name: row.name,
-      redirectURI: row.redirect_uri
-    };
-    return cb(null, client);
-  });
-}));
+passport.use(new HTTPBasicStrategy(verify));
+passport.use(new OAuth2ClientPasswordStrategy(verify));
 
 
 var as = oauth2orize.createServer();
