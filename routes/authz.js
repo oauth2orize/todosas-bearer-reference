@@ -81,20 +81,28 @@ router.post('/consent',
     });
   });
 
-router.get('/consent/:grantID', csrf(), ensureLoggedIn, fetchClient, function(req, res, next) {
-  res.render('consent', {
-    user: req.user,
-    scope: req.query.scope && req.query.scope.split(' '),
-    action: url.parse(req.originalUrl).pathname,
-    csrfToken: req.csrfToken()
+router.get('/consent/:grantID',
+  csrf(),
+  ensureLoggedIn,
+  fetchClient,
+  function(req, res, next) {
+    res.render('consent', {
+      user: req.user,
+      scope: req.query.scope && req.query.scope.split(' '),
+      action: url.parse(req.originalUrl).pathname,
+      csrfToken: req.csrfToken()
+    });
   });
-});
 
-router.post('/consent/:grantID', csrf(), ensureLoggedIn, fetchClient, function(req, res, next) {
-  var client = res.locals.client;
+router.post('/consent/:grantID',
+  csrf(),
+  ensureLoggedIn,
+  fetchClient,
+  function(req, res, next) {
+    var client = res.locals.client;
   
-  console.log('UPDATE EXISTING GRANT');
+    console.log('UPDATE EXISTING GRANT');
   
-});
+  });
 
 module.exports = router;
