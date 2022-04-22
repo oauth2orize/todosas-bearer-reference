@@ -37,7 +37,7 @@ db.serialize(function() {
     scope TEXT, \
     issued_at DATETIME DEFAULT CURRENT_TIMESTAMP, \
     expires_at DATETIME, \
-    value TEXT UNIQUE NOT NULL \
+    code TEXT UNIQUE NOT NULL \
   )");
   
   db.run("CREATE TABLE IF NOT EXISTS access_tokens ( \
@@ -46,7 +46,7 @@ db.serialize(function() {
     scope TEXT, \
     issued_at DATETIME DEFAULT CURRENT_TIMESTAMP, \
     expires_at DATETIME, \
-    value TEXT UNIQUE NOT NULL \
+    token TEXT UNIQUE NOT NULL \
   )");
   
   // create an initial user (username: alice, password: letmein)

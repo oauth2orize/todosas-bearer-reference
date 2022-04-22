@@ -51,7 +51,7 @@ as.grant(oauth2orize.grant.code(function issue(client, redirectURI, user, ares, 
   crypto.randomBytes(32, function(err, buffer) {
     if (err) { return cb(err); }
     var code = buffer.toString('base64');
-    db.run('INSERT INTO authorization_codes (client_id, redirect_uri, user_id, grant_id, value) VALUES (?, ?, ?, ?, ?)', [
+    db.run('INSERT INTO authorization_codes (client_id, redirect_uri, user_id, grant_id, code) VALUES (?, ?, ?, ?, ?)', [
       client.id,
       redirectURI,
       user.id,
@@ -70,7 +70,7 @@ as.grant(oauth2orize.grant.token(function issue(client, user, ares, cb) {
   crypto.randomBytes(64, function(err, buffer) {
     if (err) { return cb(err); }
     var token = buffer.toString('base64');
-    db.run('INSERT INTO access_tokens (user_id, client_id, value) VALUES (?, ?, ?)', [
+    db.run('INSERT INTO access_tokens (user_id, client_id, token) VALUES (?, ?, ?)', [
       user.id,
       client.id,
       token,
@@ -82,7 +82,7 @@ as.grant(oauth2orize.grant.token(function issue(client, user, ares, cb) {
 }));
 
 as.exchange(oauth2orize.exchange.code(function issue(client, code, redirectURI, cb) {
-  db.get('SELECT * FROM authorization_codes WHERE value = ?', [
+  db.get('SELECT * FROM authorization_codes WHERE code = ?', [
     code
   ], function(err, row) {
     if (err) { return cb(err); }
@@ -91,7 +91,7 @@ as.exchange(oauth2orize.exchange.code(function issue(client, code, redirectURI, 
     crypto.randomBytes(64, function(err, buffer) {
       if (err) { return cb(err); }
       var token = buffer.toString('base64');
-      db.run('INSERT INTO access_tokens (user_id, client_id, value) VALUES (?, ?, ?)', [
+      db.run('INSERT INTO access_tokens (user_id, client_id, token) VALUES (?, ?, ?)', [
         row.user_id,
         row.client_id,
         token,

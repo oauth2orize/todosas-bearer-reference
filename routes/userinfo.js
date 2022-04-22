@@ -5,7 +5,7 @@ var db = require('../db');
 
 
 passport.use(new HTTPBearerStrategy(function verify(token, cb) {
-  db.get('SELECT * FROM access_tokens WHERE value = ?', [
+  db.get('SELECT * FROM access_tokens WHERE token = ?', [
     token
   ], function(err, row) {
     if (err) { return cb(err); }
