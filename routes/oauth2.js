@@ -110,14 +110,33 @@ function evaluate(oauth2, cb) {
   console.log(oauth2.req);
   console.log(oauth2.locals);
   console.log(oauth2.info);
-  
+  oauth2.locals = oauth2.locals || {};
   
   async.waterfall([
     function login(next) {
       if (!oauth2.user) { return cb(null, false, oauth2.info, { prompt: 'login'} ); }
       next();
     },
+    function allowed(next) {
+      if (!oauth2.locals.grantID) { return next(); }
+      
+      db.get('SELECT * FROM grants WHERE id = ?', [ oauth2.locals.grantID ], function(err, row) {
+        if (err) { return next(err); }
+        if (!row) { return next(createError(400, 'Unknown grant "' + oauth2.locals.grantID + '"')); }
+        if (row.user_id !== oauth2.user.id) { return next(createError(403, 'Unauthorized grant "' + row.id + '" for user')); }
+        if (row.client_id !== oauth2.client.id) { return next(createError(403, 'Unauthorized grant "' + row.id + '" for client')); }
+        
+        var grant = {
+          id: row.id,
+          scope: oauth2.locals.scope
+        };
+        return cb(null, true, { grant: grant });
+      });
+    },
     function consent(next) {
+      if (oauth2.client.type !== 'confidential') { return cb(null, false, oauth2.info, { prompt: 'consent'} ); }
+      if (oauth2.req.type !== 'code') { return cb(null, false, oauth2.info, { prompt: 'consent'} ); }
+      
       db.get('SELECT * FROM grants WHERE user_id = ? AND client_id = ?', [
         oauth2.user.id,
         oauth2.client.id
@@ -126,16 +145,14 @@ function evaluate(oauth2, cb) {
         if (!row) { return cb(null, false, oauth2.info, { prompt: 'consent' }); }
         var grant = {
           id: row.id,
-          userID: row.user_id,
-          clientID: row.client_id,
           scope: row.scope ? row.scope.split(' ') : null
         };
-        return next(null, { grant: grant });
+        return cb(null, true, { grant: grant });
       });
     }
-  ], function(err, res) {
+  ], function(err) {
     if (err) { return cb(err); }
-    return cb(null, true, res);
+    return cb(new Error('Internal authorization error'));
   });
 }
 
@@ -174,16 +191,18 @@ router.get('/authorize',
       return cb(null, client, client.redirectURI);
     });
   }, evaluate),
-  interact);
+  interact,
+  as.authorizationErrorHandler());
 
 router.get('/continue',
   function(req, res, next) {
     res.locals.grantID = req.query.grant_id;
-    res.locals.scope = req.query.scope;
+    res.locals.scope = req.query.scope && req.query.scope.split(' ');
     next();
   },
   as.resume(evaluate),
-  interact);
+  interact,
+  as.authorizationErrorHandler());
 
 router.post('/token',
   passport.authenticate(['basic', 'oauth2-client-password'], { session: false }),
