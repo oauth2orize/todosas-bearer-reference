@@ -103,7 +103,12 @@ as.deserializeClient(function(client, cb) {
 });
 
 
-function evaluate(client, user, scope, cb) {
+function evaluate(client, user, scope, type, params, locals, cb) {
+  console.log('** EVAL **');
+  console.log(params);
+  console.log(locals);
+  
+  
   if (!user) { return cb(null, false, undefined, { prompt: 'login'} ); }
   
   db.get('SELECT * FROM grants WHERE user_id = ? AND client_id = ?', [
@@ -138,21 +143,25 @@ function interact(req, res, next) {
 var router = express.Router();
 
 // http://localhost:3000/oauth2/authorize?response_type=code&client_id=1&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Foauth2%2Fredirect
-router.get('/authorize', as.authorize(function validate(clientID, redirectURI, cb) {
-  db.get('SELECT * FROM clients WHERE id = ?', [ clientID ], function(err, row) {
-    if (err) { return cb(err); }
-    if (!row) { return cb(createError(400, 'Unknown client "' + clientID + '"')); }
-    var client = {
-      id: row.id,
-      name: row.name,
-      redirectURI: row.redirect_uri
-    };
-    if (client.redirectURI != redirectURI) { return cb(null, false); }
-    return cb(null, client, client.redirectURI);
-  });
-}, evaluate), interact);
+router.get('/authorize',
+  as.authorize(function validate(clientID, redirectURI, cb) {
+    db.get('SELECT * FROM clients WHERE id = ?', [ clientID ], function(err, row) {
+      if (err) { return cb(err); }
+      if (!row) { return cb(createError(400, 'Unknown client "' + clientID + '"')); }
+      var client = {
+        id: row.id,
+        name: row.name,
+        redirectURI: row.redirect_uri
+      };
+      if (client.redirectURI != redirectURI) { return cb(null, false); }
+      return cb(null, client, client.redirectURI);
+    });
+  }, evaluate),
+  interact);
 
-router.get('/continue', as.resume(evaluate), interact);
+router.get('/continue',
+  as.resume(evaluate),
+  interact);
 
 router.post('/token',
   passport.authenticate(['basic', 'oauth2-client-password'], { session: false }),
