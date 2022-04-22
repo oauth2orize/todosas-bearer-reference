@@ -21,7 +21,7 @@ passport.use(new HTTPBearerStrategy(function verify(token, cb) {
 
 var router = express.Router();
 
-router.get('/', passport.authenticate('bearer', { session: false }), function(req, res, next) {
+router.get('/userinfo', passport.authenticate('bearer', { session: false }), function(req, res, next) {
   db.get('SELECT * FROM users WHERE id = ?', [ req.user.id ], function(err, row) {
     if (err) { return next(err); }
     // TODO: Handle undefined row.

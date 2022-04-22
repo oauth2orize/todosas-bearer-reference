@@ -31,7 +31,7 @@ app.use(session({
   secret: 'keyboard cat',
   resave: false, // don't save session if unmodified
   saveUninitialized: false, // don't create session until something stored
-  store: new SQLiteStore({ db: 'sessions.db', dir: 'var/db' })
+  store: new SQLiteStore({ db: 'sessions.db', dir: './var/db' })
 }));
 app.use(function(req, res, next) {
   console.log('# ' + req.method + ' ' + req.url)
@@ -44,7 +44,7 @@ app.use(passport.authenticate('session'));
 app.use('/', authRouter);
 app.use('/', authzRouter);
 app.use('/oauth2', oauth2Router);
-app.use('/userinfo', userinfoRouter);
+app.use('/openidconnect', userinfoRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

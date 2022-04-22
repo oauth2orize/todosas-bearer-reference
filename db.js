@@ -2,9 +2,9 @@ var sqlite3 = require('sqlite3');
 var mkdirp = require('mkdirp');
 var crypto = require('crypto');
 
-mkdirp.sync('var/db');
+mkdirp.sync('./var/db');
 
-var db = new sqlite3.Database('var/db/users.db');
+var db = new sqlite3.Database('./var/db/users.db');
 
 db.serialize(function() {
   db.run("CREATE TABLE IF NOT EXISTS users ( \
@@ -61,13 +61,13 @@ db.serialize(function() {
   db.run('INSERT OR IGNORE INTO clients (id, secret, name, redirect_uri) VALUES (?, ?, ?, ?)', [
     1,
     '7Fjfp0ZBr1KtDRbnfVdmIw',
-    'TodoMVC',
+    'Todos',
     'http://localhost:3000/oauth2/redirect'
   ]);
   
   db.run('INSERT OR IGNORE INTO clients (id, name, redirect_uri) VALUES (?, ?, ?)', [
     2,
-    'TodoMVC',
+    'Todos',
     'http://localhost:3000/'
   ]);
 });
