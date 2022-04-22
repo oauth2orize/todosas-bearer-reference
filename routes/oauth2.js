@@ -1,11 +1,12 @@
 var createError = require('http-errors');
 var express = require('express');
-var url = require('url');
-var qs = require('querystring');
 var oauth2orize = require('oauth2orize');
 var passport = require('passport');
 var HTTPBasicStrategy = require('passport-http').BasicStrategy;
 var OAuth2ClientPasswordStrategy = require('passport-oauth2-client-password');
+var async = require('async');
+var url = require('url');
+var qs = require('querystring');
 var crypto = require('crypto');
 var db = require('../db');
 
@@ -103,27 +104,37 @@ as.deserializeClient(function(client, cb) {
 });
 
 
-function evaluate(client, user, scope, type, params, locals, cb) {
+function evaluate(oauth2, cb) {
   console.log('** EVAL **');
-  console.log(params);
-  console.log(locals);
+  console.log(oauth2.req);
+  console.log(oauth2.locals);
+  console.log(oauth2.info);
   
   
-  if (!user) { return cb(null, false, undefined, { prompt: 'login'} ); }
-  
-  db.get('SELECT * FROM grants WHERE user_id = ? AND client_id = ?', [
-    user.id,
-    client.id
-  ], function(err, row) {
-    if (err) { return next(err); }
-    if (!row) { return cb(null, false, undefined, { prompt: 'consent' }); }
-    var grant = {
-      id: row.id,
-      userID: row.user_id,
-      clientID: row.client_id,
-      scope: row.scope.split(' ')
-    };
-    return cb(null, true, { grant: grant });
+  async.waterfall([
+    function login(next) {
+      if (!oauth2.user) { return cb(null, false, { a: 'b' }, { prompt: 'login'} ); }
+      next();
+    },
+    function consent(next) {
+      db.get('SELECT * FROM grants WHERE user_id = ? AND client_id = ?', [
+        oauth2.user.id,
+        oauth2.client.id
+      ], function(err, row) {
+        if (err) { return next(err); }
+        if (!row) { return cb(null, false, undefined, { prompt: 'consent' }); }
+        var grant = {
+          id: row.id,
+          userID: row.user_id,
+          clientID: row.client_id,
+          scope: row.scope.split(' ')
+        };
+        return next(null, { grant: grant });
+      });
+    }
+  ], function(err, res) {
+    if (err) { return cb(err); }
+    return cb(null, true, res);
   });
 }
 
@@ -160,6 +171,13 @@ router.get('/authorize',
   interact);
 
 router.get('/continue',
+  function(req, res, next) {
+    console.log('LOAD STUFF...');
+    
+    res.locals.foo = 'bar';
+    
+    next();
+  },
   as.resume(evaluate),
   interact);
 

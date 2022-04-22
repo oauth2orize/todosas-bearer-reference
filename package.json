@@ -32,6 +32,7 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
+    "async": "^3.2.3",
     "connect-ensure-login": "^0.1.1",
     "connect-sqlite3": "^0.9.13",
     "cookie-parser": "~1.4.4",
