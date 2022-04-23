@@ -8,7 +8,7 @@ var db = require('../db');
 var ensureLoggedIn = ensureLogIn();
 
 function fetchClient(req, res, next) {
-  var clientID = req.body.client_id || req.query.client_id;
+  var clientID = (res.locals.grant && res.locals.grant.clientID) || req.body.client_id || req.query.client_id;
   
   db.get('SELECT * FROM clients WHERE id = ?', [ clientID ], function(err, row) {
     if (err) { return next(err); }
@@ -63,7 +63,7 @@ router.post('/consent',
       req.body.client_id,
       req.body.scope
     ], function(err) {
-      if (err) { return cb(err); }
+      if (err) { return next(err); }
       var grant = {
         id: this.lastID,
         scope: req.body.scope
@@ -84,6 +84,11 @@ router.post('/consent',
 router.get('/consent/:grantID',
   csrf(),
   ensureLoggedIn,
+  fetchGrant,
+  function authorize(req, res, next) {
+    if (res.locals.grant.id !== req.user.id) { return next(createError(403)); }
+    return next();
+  },
   fetchClient,
   function(req, res, next) {
     res.render('consent', {
@@ -97,12 +102,34 @@ router.get('/consent/:grantID',
 router.post('/consent/:grantID',
   csrf(),
   ensureLoggedIn,
-  fetchClient,
+  fetchGrant,
+  function authorize(req, res, next) {
+    if (res.locals.grant.id !== req.user.id) { return next(createError(403)); }
+    return next();
+  },
   function(req, res, next) {
-    var client = res.locals.client;
-  
-    console.log('UPDATE EXISTING GRANT');
-  
+    var grant = res.locals.grant;
+    
+    db.run('UPDATE grants SET scope = ? WHERE id = ?', [
+      'xxx',
+      req.params.grantID
+    ], function(err) {
+      if (err) { return next(err); }
+      var grant = {
+        id: req.params.grantID,
+        scope: req.body.scope
+      };
+      var to;
+      if (req.session.returnTo) {
+        to = url.parse(req.session.returnTo, true);
+        to.query.grant_id = grant.id;
+        to.query.scope = grant.scope;
+        delete to.search;
+        to = url.format(to);
+        delete req.session.returnTo;
+      }
+      return res.redirect(to || '/');
+    });
   });
 
 module.exports = router;
