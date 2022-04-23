@@ -20,6 +20,23 @@ Then start the server.
 $ npm start
 ```
 
+## Overview
+
+This example illustrates how to build an OAuth 2.0 authorization server that
+supports clients using the web-based authorization code and implicit grants.
+The access tokens issued to clients are bearer tokens, the contents of which are
+stored in a [SQLite](https://www.sqlite.org/) database.
+
+This app implements sign in and consent functionality.  User interaction is
+performed via HTML pages and forms, which are rendered via [EJS](https://ejs.co/)
+templates and styled with vanilla CSS.  Data is stored in a [SQLite](https://www.sqlite.org/)
+database.
+
+This app exposes OAuth 2.0 endpoints, allowing it to manage access to other apps
+and APIs that rely on this server.  This provides the ability to offer single
+sign-on (SSO) to a suite of apps and control third-party access to protected
+APIs.
+
 ## License
 
 [The Unlicense](https://opensource.org/licenses/unlicense)
