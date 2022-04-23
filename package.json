@@ -1,8 +1,8 @@
 {
-  "name": "todosas",
+  "name": "todosas-bearer-reference",
   "version": "0.0.0",
   "private": true,
-  "description": "OAuth 2.0 authorization server using Express and OAuth2orize to issue tokens.",
+  "description": "OAuth 2.0 server using Express and OAuth2orize to issue reference bearer tokens.",
   "keywords": [
     "example",
     "express",
@@ -15,13 +15,13 @@
     "email": "jaredhanson@gmail.com",
     "url": "https://www.jaredhanson.me/"
   },
-  "homepage": "https://github.com/oauth2orize/todosas",
+  "homepage": "https://github.com/oauth2orize/todosas-bearer-reference",
   "repository": {
     "type": "git",
-    "url": "git://github.com/oauth2orize/todosas.git"
+    "url": "git://github.com/oauth2orize/todosas-bearer-reference.git"
   },
   "bugs": {
-    "url": "https://github.com/oauth2orize/todosas/issues"
+    "url": "https://github.com/oauth2orize/todosas-bearer-reference/issues"
   },
   "funding": {
     "type": "github",
