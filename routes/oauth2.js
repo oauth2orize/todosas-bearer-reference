@@ -105,11 +105,6 @@ as.deserializeClient(function(client, cb) {
 
 
 function evaluate(oauth2, cb) {
-  console.log('** EVAL **');
-  console.log(oauth2.client);
-  console.log(oauth2.req);
-  console.log(oauth2.locals);
-  console.log(oauth2.info);
   oauth2.locals = oauth2.locals || {};
   
   async.waterfall([
@@ -143,23 +138,14 @@ function evaluate(oauth2, cb) {
       ], function(err, row) {
         if (err) { return next(err); }
         if (!row) { return cb(null, false, oauth2.info, { prompt: 'consent', scope: oauth2.req.scope }); }
+        
         var grant = {
           id: row.id,
           scope: row.scope ? row.scope.split(' ') : null
         };
-        
-        console.log('EXISTING SCOPE: ');
-        console.log(grant)
-        console.log('REQUESTED SCOPE');
-        console.log(oauth2.req)
-        
-        var addscope = oauth2.req.scope.filter(function(rs) { return grant.scope.indexOf(rs) == -1 });
-        console.log('ADDED');
-        console.log(addscope);
-        
-        
-        if (addscope) {
-          return cb(null, false, oauth2.info, { prompt: 'reconsent', grant: grant, scope: addscope });
+        var addscope = oauth2.req.scope.filter(function(s) { return grant.scope.indexOf(s) == -1 });
+        if (addscope.length > 0) {
+          return cb(null, false, oauth2.info, { prompt: 'reconsent', grant: grant, scope: oauth2.req.scope });
         }
         return cb(null, true, { grant: grant, scope: oauth2.req.scope });
       });
