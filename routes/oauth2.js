@@ -80,9 +80,10 @@ as.exchange(oauth2orize.exchange.code(function issue(client, code, redirectURI, 
     crypto.randomBytes(64, function(err, buffer) {
       if (err) { return cb(err); }
       var token = buffer.toString('base64');
-      db.run('INSERT INTO access_tokens (user_id, client_id, token) VALUES (?, ?, ?)', [
+      db.run('INSERT INTO access_tokens (user_id, client_id, scope, token) VALUES (?, ?, ?, ?)', [
         row.user_id,
         row.client_id,
+        row.scope,
         token,
       ], function(err) {
         if (err) { return cb(err); }
