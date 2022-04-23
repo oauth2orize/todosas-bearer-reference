@@ -34,16 +34,15 @@ passport.use(new OAuth2ClientPasswordStrategy(verify));
 var as = oauth2orize.createServer();
 
 as.grant(oauth2orize.grant.code(function issue(client, redirectURI, user, ares, cb) {
-  var grant = ares.grant;
-  
   crypto.randomBytes(32, function(err, buffer) {
     if (err) { return cb(err); }
     var code = buffer.toString('base64');
-    db.run('INSERT INTO authorization_codes (client_id, redirect_uri, user_id, grant_id, code) VALUES (?, ?, ?, ?, ?)', [
+    db.run('INSERT INTO authorization_codes (client_id, redirect_uri, user_id, grant_id, scope, code) VALUES (?, ?, ?, ?, ?, ?)', [
       client.id,
       redirectURI,
       user.id,
-      grant.id,
+      ares.grant.id,
+      ares.scope.join(' '),
       code
     ], function(err) {
       if (err) { return cb(err); }
@@ -75,6 +74,8 @@ as.exchange(oauth2orize.exchange.code(function issue(client, code, redirectURI, 
   ], function(err, row) {
     if (err) { return cb(err); }
     if (!row) { return cb(null, false); }
+    if (row.client_id !== client.id) { return cb(null, false); }
+    if (row.redirect_uri !== redirectURI) { return cb(null, false); }
     
     crypto.randomBytes(64, function(err, buffer) {
       if (err) { return cb(err); }
