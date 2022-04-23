@@ -128,9 +128,9 @@ function evaluate(oauth2, cb) {
         
         var grant = {
           id: row.id,
-          scope: oauth2.locals.scope
+          scope: row.scope ? row.scope.split(' ') : null
         };
-        return cb(null, true, { grant: grant });
+        return cb(null, true, { grant: grant, scope: oauth2.locals.scope });
       });
     },
     function consent(next) {
@@ -153,8 +153,15 @@ function evaluate(oauth2, cb) {
         console.log('REQUESTED SCOPE');
         console.log(oauth2.req)
         
+        var addscope = oauth2.req.scope.filter(function(rs) { return grant.scope.indexOf(rs) == -1 });
+        console.log('ADDED');
+        console.log(addscope);
         
-        return cb(null, true, { grant: grant });
+        
+        if (addscope) {
+          return cb(null, false, oauth2.info, { prompt: 'reconsent', grant: grant, scope: addscope });
+        }
+        return cb(null, true, { grant: grant, scope: oauth2.req.scope });
       });
     }
   ], function(err) {
@@ -177,6 +184,13 @@ function interact(req, res, next) {
       query.scope = req.oauth2.locals.scope.join(' ');
     }
     return res.redirect('/consent?' + qs.stringify(query));
+  case 'reconsent':
+    if (req.oauth2.locals.scope) {
+      query.scope = req.oauth2.locals.scope.join(' ');
+    }
+    return res.redirect('/consent/' + req.oauth2.locals.grant.id + '?' + qs.stringify(query));
+  default:
+    return next(new Error('Unsupported prompt "' + prompt + '"'));
   }
 }
 
