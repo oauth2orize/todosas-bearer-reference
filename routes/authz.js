@@ -109,21 +109,23 @@ router.post('/consent/:grantID',
   },
   function(req, res, next) {
     var grant = res.locals.grant;
+    var scope = req.body.scope ? req.body.scope.split(' ') : [];
+    scope.forEach(function(s) {
+      if (grant.scope.indexOf(s) == -1) {
+        grant.scope.push(s);
+      }
+    });
     
     db.run('UPDATE grants SET scope = ? WHERE id = ?', [
-      'xxx',
-      req.params.grantID
+      grant.scope.join(' '),
+      grant.id
     ], function(err) {
       if (err) { return next(err); }
-      var grant = {
-        id: req.params.grantID,
-        scope: req.body.scope
-      };
       var to;
       if (req.session.returnTo) {
         to = url.parse(req.session.returnTo, true);
         to.query.grant_id = grant.id;
-        to.query.scope = grant.scope;
+        to.query.scope = req.body.scope;
         delete to.search;
         to = url.format(to);
         delete req.session.returnTo;
