@@ -86,7 +86,7 @@ router.get('/consent/:grantID',
   ensureLoggedIn,
   fetchGrant,
   function authorize(req, res, next) {
-    if (res.locals.grant.id !== req.user.id) { return next(createError(403)); }
+    if (res.locals.grant.userID !== req.user.id) { return next(createError(403)); }
     return next();
   },
   function resolveClient(req, res, next) {
@@ -117,7 +117,7 @@ router.post('/consent/:grantID',
   ensureLoggedIn,
   fetchGrant,
   function authorize(req, res, next) {
-    if (res.locals.grant.id !== req.user.id) { return next(createError(403)); }
+    if (res.locals.grant.userID !== req.user.id) { return next(createError(403)); }
     return next();
   },
   function(req, res, next) {
