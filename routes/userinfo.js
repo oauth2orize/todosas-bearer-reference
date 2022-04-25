@@ -6,15 +6,17 @@ var db = require('../db');
 
 
 passport.use(new HTTPBearerStrategy(function verify(token, cb) {
+  var now = Date.now();
   db.get('SELECT * FROM access_tokens WHERE token = ?', [
     token
   ], function(err, row) {
     if (err) { return cb(err); }
     if (!row) { return cb(null, false); }
+    if (Date.parse(row.expires_at + 'Z') <= now) { return cb(null, false); }
+    
     var user = {
       id: row.user_id
     };
-    // TODO: check expires at
     var authInfo = {
       scope: row.scope ? row.scope.split(' ') : []
     };

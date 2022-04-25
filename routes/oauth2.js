@@ -68,10 +68,12 @@ as.exchange(oauth2orize.exchange.code(function issue(client, code, redirectURI, 
     crypto.randomBytes(64, function(err, buffer) {
       if (err) { return cb(err); }
       var token = buffer.toString('base64');
-      db.run('INSERT INTO access_tokens (user_id, client_id, scope, token) VALUES (?, ?, ?, ?)', [
+      var expiresAt = new Date(Date.now() + 3600000); // 1 hour from now
+      db.run('INSERT INTO access_tokens (user_id, client_id, scope, expires_at, token) VALUES (?, ?, ?, ?, ?)', [
         row.user_id,
         row.client_id,
         row.scope,
+        dateFormat(expiresAt, 'yyyy-mm-dd HH:MM:ss', true),
         token,
       ], function(err) {
         if (err) { return cb(err); }
