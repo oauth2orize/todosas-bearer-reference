@@ -46,8 +46,8 @@ db.serialize(function() {
     user_id INTEGER NOT NULL, \
     client_id INTEGER NOT NULL, \
     scope TEXT, \
-    issued_at DATETIME DEFAULT CURRENT_TIMESTAMP, \
-    expires_at DATETIME, \
+    issued_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, \
+    expires_at DATETIME NOT NULL, \
     token TEXT UNIQUE NOT NULL \
   )");
   
