@@ -67,22 +67,35 @@ as.exchange(oauth2orize.exchange.code(function issue(client, code, redirectURI, 
     
     crypto.randomBytes(64, function(err, buffer) {
       if (err) { return cb(err); }
-      var token = buffer.toString('base64');
+      var accessToken = buffer.toString('base64');
       var expiresAt = new Date(Date.now() + 3600000); // 1 hour from now
       db.run('INSERT INTO access_tokens (user_id, client_id, scope, expires_at, token) VALUES (?, ?, ?, ?, ?)', [
         row.user_id,
         row.client_id,
         row.scope,
         dateFormat(expiresAt, 'yyyy-mm-dd HH:MM:ss', true),
-        token,
+        accessToken,
       ], function(err) {
         if (err) { return cb(err); }
         
-        db.run('DELETE FROM authorization_codes WHERE code = ?', [
-          code
-        ], function(err) {
+        crypto.randomBytes(64, function(err, buffer) {
           if (err) { return cb(err); }
-          return cb(null, token);
+          var refreshToken = buffer.toString('base64');
+          var expiresAt = new Date(Date.now() + 2592000000); // 30 days from now
+          db.run('INSERT INTO refresh_tokens (grant_id, expires_at, token) VALUES (?, ?, ?)', [
+            row.grant_id,
+            dateFormat(expiresAt, 'yyyy-mm-dd HH:MM:ss', true),
+            refreshToken,
+          ], function(err) {
+            if (err) { return cb(err); }
+            
+            db.run('DELETE FROM authorization_codes WHERE code = ?', [
+              code
+            ], function(err) {
+              if (err) { return cb(err); }
+              return cb(null, accessToken, refreshToken, { expires_in: 3600 });
+            });
+          });
         });
       });
     });

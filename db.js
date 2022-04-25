@@ -51,6 +51,13 @@ db.serialize(function() {
     token TEXT UNIQUE NOT NULL \
   )");
   
+  db.run("CREATE TABLE IF NOT EXISTS refresh_tokens ( \
+    grant_id INTEGER NOT NULL, \
+    issued_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, \
+    expires_at DATETIME, \
+    token TEXT UNIQUE NOT NULL \
+  )");
+  
   // create an initial user (username: alice, password: letmein)
   var salt = crypto.randomBytes(16);
   db.run('INSERT OR IGNORE INTO users (username, hashed_password, salt) VALUES (?, ?, ?)', [
