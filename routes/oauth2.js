@@ -8,6 +8,7 @@ var async = require('async');
 var url = require('url');
 var qs = require('querystring');
 var crypto = require('crypto');
+var dateFormat = require('dateformat');
 var db = require('../db');
 
 
@@ -37,12 +38,14 @@ as.grant(oauth2orize.grant.code(function issue(client, redirectURI, user, ares, 
   crypto.randomBytes(32, function(err, buffer) {
     if (err) { return cb(err); }
     var code = buffer.toString('base64');
-    db.run('INSERT INTO authorization_codes (client_id, redirect_uri, user_id, grant_id, scope, code) VALUES (?, ?, ?, ?, ?, ?)', [
+    var expiresAt = new Date(Date.now() + 600000); // 10 minutes from now
+    db.run('INSERT INTO authorization_codes (client_id, redirect_uri, user_id, grant_id, scope, expires_at, code) VALUES (?, ?, ?, ?, ?, ?, ?)', [
       client.id,
       redirectURI,
       user.id,
       ares.grant.id,
       ares.scope.join(' '),
+      dateFormat(expiresAt, 'yyyy-mm-dd HH:MM:ss', true),
       code
     ], function(err) {
       if (err) { return cb(err); }
@@ -52,6 +55,7 @@ as.grant(oauth2orize.grant.code(function issue(client, redirectURI, user, ares, 
 }));
 
 as.exchange(oauth2orize.exchange.code(function issue(client, code, redirectURI, cb) {
+  var now = Date.now();
   db.get('SELECT * FROM authorization_codes WHERE code = ?', [
     code
   ], function(err, row) {
@@ -59,6 +63,7 @@ as.exchange(oauth2orize.exchange.code(function issue(client, code, redirectURI, 
     if (!row) { return cb(null, false); }
     if (row.client_id !== client.id) { return cb(null, false); }
     if (row.redirect_uri !== redirectURI) { return cb(null, false); }
+    if (Date.parse(row.expires_at + 'Z') <= now) { return cb(null, false); }
     
     crypto.randomBytes(64, function(err, buffer) {
       if (err) { return cb(err); }
