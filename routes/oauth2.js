@@ -77,7 +77,13 @@ as.exchange(oauth2orize.exchange.code(function issue(client, code, redirectURI, 
         token,
       ], function(err) {
         if (err) { return cb(err); }
-        return cb(null, token);
+        
+        db.run('DELETE FROM authorization_codes WHERE code = ?', [
+          code
+        ], function(err) {
+          if (err) { return cb(err); }
+          return cb(null, token);
+        });
       });
     });
   });
