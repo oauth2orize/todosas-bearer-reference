@@ -11,7 +11,19 @@ var db = require('./db');
 // allowing it to inherit from session.Store
 var SQLiteStore = require('connect-sqlite3')(session);
 
-var authRouter = require('./routes/auth');
+passport.serializeUser(function(user, cb) {
+  process.nextTick(function() {
+    cb(null, { id: user.id, username: user.username });
+  });
+});
+
+passport.deserializeUser(function(user, cb) {
+  process.nextTick(function() {
+    return cb(null, user);
+  });
+});
+
+var authRouter = require('@oauth2orize-examples/todos-login')(passport, db);
 var authzRouter = require('./routes/authz');
 var oauth2Router = require('./routes/oauth2');
 var userinfoRouter = require('@oauth2orize-examples/userinfoapi-bearer')(db, db);
