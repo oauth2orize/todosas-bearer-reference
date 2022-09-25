@@ -5,6 +5,7 @@ var cookieParser = require('cookie-parser');
 var session = require('express-session');
 var passport = require('passport');
 var logger = require('morgan');
+var db = require('./db');
 
 // pass the session to the connect sqlite3 module
 // allowing it to inherit from session.Store
@@ -13,7 +14,7 @@ var SQLiteStore = require('connect-sqlite3')(session);
 var authRouter = require('./routes/auth');
 var authzRouter = require('./routes/authz');
 var oauth2Router = require('./routes/oauth2');
-var userinfoRouter = require('./routes/userinfo');
+var userinfoRouter = require('@oauth2orize-examples/userinfoapi-bearer')(db, db);
 
 var app = express();
 
