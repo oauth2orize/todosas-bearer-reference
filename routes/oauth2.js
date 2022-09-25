@@ -9,11 +9,12 @@ var url = require('url');
 var qs = require('querystring');
 var crypto = require('crypto');
 var dateFormat = require('dateformat');
-var db = require('../db');
 
+
+exports = module.exports = function(authzDB) {
 
 function verify(clientID, clientSecret, cb) {
-  db.get('SELECT * FROM clients WHERE id = ?', [ clientID ], function(err, row) {
+  authzDB.get('SELECT * FROM clients WHERE id = ?', [ clientID ], function(err, row) {
     if (err) { return next(err); }
     if (!row) { return cb(null, false); }
     if (!crypto.timingSafeEqual(Buffer.from(row.secret), Buffer.from(clientSecret))) {
@@ -39,7 +40,7 @@ as.grant(oauth2orize.grant.code(function issue(client, redirectURI, user, ares, 
     if (err) { return cb(err); }
     var code = buffer.toString('base64');
     var expiresAt = new Date(Date.now() + 600000); // 10 minutes from now
-    db.run('INSERT INTO authorization_codes (client_id, redirect_uri, user_id, grant_id, scope, expires_at, code) VALUES (?, ?, ?, ?, ?, ?, ?)', [
+    authzDB.run('INSERT INTO authorization_codes (client_id, redirect_uri, user_id, grant_id, scope, expires_at, code) VALUES (?, ?, ?, ?, ?, ?, ?)', [
       client.id,
       redirectURI,
       user.id,
@@ -56,7 +57,7 @@ as.grant(oauth2orize.grant.code(function issue(client, redirectURI, user, ares, 
 
 as.exchange(oauth2orize.exchange.code(function issue(client, code, redirectURI, cb) {
   var now = Date.now();
-  db.get('SELECT * FROM authorization_codes WHERE code = ?', [
+  authzDB.get('SELECT * FROM authorization_codes WHERE code = ?', [
     code
   ], function(err, row) {
     if (err) { return cb(err); }
@@ -69,7 +70,7 @@ as.exchange(oauth2orize.exchange.code(function issue(client, code, redirectURI, 
       if (err) { return cb(err); }
       var accessToken = buffer.toString('base64');
       var expiresAt = new Date(Date.now() + 3600000); // 1 hour from now
-      db.run('INSERT INTO access_tokens (user_id, client_id, scope, expires_at, token) VALUES (?, ?, ?, ?, ?)', [
+      authzDB.run('INSERT INTO access_tokens (user_id, client_id, scope, expires_at, token) VALUES (?, ?, ?, ?, ?)', [
         row.user_id,
         row.client_id,
         row.scope,
@@ -82,14 +83,14 @@ as.exchange(oauth2orize.exchange.code(function issue(client, code, redirectURI, 
           if (err) { return cb(err); }
           var refreshToken = buffer.toString('base64');
           var expiresAt = new Date(Date.now() + 2592000000); // 30 days from now
-          db.run('INSERT INTO refresh_tokens (grant_id, expires_at, token) VALUES (?, ?, ?)', [
+          authzDB.run('INSERT INTO refresh_tokens (grant_id, expires_at, token) VALUES (?, ?, ?)', [
             row.grant_id,
             dateFormat(expiresAt, 'yyyy-mm-dd HH:MM:ss', true),
             refreshToken,
           ], function(err) {
             if (err) { return cb(err); }
             
-            db.run('DELETE FROM authorization_codes WHERE code = ?', [
+            authzDB.run('DELETE FROM authorization_codes WHERE code = ?', [
               code
             ], function(err) {
               if (err) { return cb(err); }
@@ -108,7 +109,7 @@ as.grant(oauth2orize.grant.token(function issue(client, user, ares, cb) {
   crypto.randomBytes(64, function(err, buffer) {
     if (err) { return cb(err); }
     var token = buffer.toString('base64');
-    db.run('INSERT INTO access_tokens (user_id, client_id, token) VALUES (?, ?, ?)', [
+    authzDB.run('INSERT INTO access_tokens (user_id, client_id, token) VALUES (?, ?, ?)', [
       user.id,
       client.id,
       token,
@@ -143,7 +144,7 @@ function evaluate(oauth2, cb) {
     function allowed(next) {
       if (!oauth2.locals.grantID) { return next(); }
       
-      db.get('SELECT * FROM grants WHERE id = ?', [ oauth2.locals.grantID ], function(err, row) {
+      authzDB.get('SELECT * FROM grants WHERE id = ?', [ oauth2.locals.grantID ], function(err, row) {
         if (err) { return next(err); }
         if (!row) { return next(createError(400, 'Unknown grant "' + oauth2.locals.grantID + '"')); }
         if (row.user_id !== oauth2.user.id) { return next(createError(403, 'Unauthorized grant "' + row.id + '" for user')); }
@@ -160,7 +161,7 @@ function evaluate(oauth2, cb) {
       if (oauth2.client.type !== 'confidential') { return cb(null, false, oauth2.info, { prompt: 'consent', scope: oauth2.req.scope } ); }
       if (oauth2.req.type !== 'code') { return cb(null, false, oauth2.info, { prompt: 'consent', scope: oauth2.req.scope } ); }
       
-      db.get('SELECT * FROM grants WHERE user_id = ? AND client_id = ?', [
+      authzDB.get('SELECT * FROM grants WHERE user_id = ? AND client_id = ?', [
         oauth2.user.id,
         oauth2.client.id
       ], function(err, row) {
@@ -213,7 +214,7 @@ var router = express.Router();
 
 router.get('/authorize',
   as.authorize(function validate(clientID, redirectURI, cb) {
-    db.get('SELECT * FROM clients WHERE id = ?', [ clientID ], function(err, row) {
+    authzDB.get('SELECT * FROM clients WHERE id = ?', [ clientID ], function(err, row) {
       if (err) { return cb(err); }
       if (!row) { return cb(createError(400, 'Unknown client "' + clientID + '"')); }
       var client = {
@@ -244,4 +245,5 @@ router.post('/token',
   as.token(),
   as.errorHandler());
 
-module.exports = router;
+  return router;
+};

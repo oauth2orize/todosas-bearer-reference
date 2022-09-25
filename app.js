@@ -25,7 +25,7 @@ passport.deserializeUser(function(user, cb) {
 
 var authRouter = require('@oauth2orize-examples/todos-login')(passport, db);
 var authzRouter = require('./routes/authz');
-var oauth2Router = require('./routes/oauth2');
+var oauth2Router = require('./routes/oauth2')(db);
 var userinfoRouter = require('@oauth2orize-examples/userinfoapi-bearer')(db, db);
 
 var app = express();
