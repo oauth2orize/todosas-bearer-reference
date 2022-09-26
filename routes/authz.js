@@ -3,14 +3,16 @@ var express = require('express');
 var csrf = require('csurf');
 var ensureLogIn = require('connect-ensure-login').ensureLoggedIn;
 var url = require('url');
-var db = require('../db');
 
 var ensureLoggedIn = ensureLogIn();
+
+
+exports = module.exports = function(authzDB) {
 
 function fetchClient(req, res, next) {
   var clientID = req.query.client_id;
   
-  db.get('SELECT * FROM clients WHERE id = ?', [ clientID ], function(err, row) {
+  authzDB.get('SELECT * FROM clients WHERE id = ?', [ clientID ], function(err, row) {
     if (err) { return next(err); }
     if (!row) { return next(createError(400, 'Unknown client "' + clientID + '"')); }
     var client = {
@@ -25,7 +27,7 @@ function fetchClient(req, res, next) {
 function fetchGrant(req, res, next) {
   var grantID = req.params.grantID;
   
-  db.get('SELECT * FROM grants WHERE id = ?', [ grantID ], function(err, row) {
+  authzDB.get('SELECT * FROM grants WHERE id = ?', [ grantID ], function(err, row) {
     if (err) { return next(err); }
     if (!row) { return next(createError(404, 'Unknown grant "' + grantID + '"')); }
     var grant = {
@@ -58,7 +60,7 @@ router.post('/consent',
   csrf(),
   ensureLoggedIn,
   function(req, res, next) {
-    db.run('INSERT INTO grants (user_id, client_id, scope) VALUES (?, ?, ?)', [
+    authzDB.run('INSERT INTO grants (user_id, client_id, scope) VALUES (?, ?, ?)', [
       req.user.id,
       req.body.client_id,
       req.body.scope
@@ -92,7 +94,7 @@ router.get('/consent/:grantID',
   function resolveClient(req, res, next) {
     var clientID = res.locals.grant.clientID;
     
-    db.get('SELECT * FROM clients WHERE id = ?', [ clientID ], function(err, row) {
+    authzDB.get('SELECT * FROM clients WHERE id = ?', [ clientID ], function(err, row) {
       if (err) { return next(err); }
       if (!row) { return next(createError(500, 'Failed to resolve client "' + clientID + '"')); }
       var client = {
@@ -129,7 +131,7 @@ router.post('/consent/:grantID',
       }
     });
     
-    db.run('UPDATE grants SET scope = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [
+    authzDB.run('UPDATE grants SET scope = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [
       grant.scope.join(' '),
       grant.id
     ], function(err) {
@@ -147,4 +149,5 @@ router.post('/consent/:grantID',
     });
   });
 
-module.exports = router;
+  return router;
+};
