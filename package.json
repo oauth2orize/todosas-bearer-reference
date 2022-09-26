@@ -32,6 +32,7 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
+    "@oauth2orize-examples/todos-login": "git+https://github.com/oauth2orize/todos-login.git",
     "@oauth2orize-examples/userinfoapi-bearer": "git+https://github.com/oauth2orize/userinfoapi-bearer.git",
     "async": "^3.2.3",
     "connect-ensure-login": "^0.1.1",
